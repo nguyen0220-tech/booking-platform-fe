@@ -239,7 +239,15 @@ const styles = {
     backgroundColor: "#f8f9fa",
     padding: "15px",
     borderRadius: "8px",
+
+    // --- CÁC THUỘC TÍNH THÊM VÀO ĐỂ FIX CỨNG ---
+    position: "sticky",
+    top: "0", // Đặt cách lề trên 0px (Nếu bạn có thanh Navbar cố định thì tăng số này lên, vd: "60px")
+    zIndex: 100, // Đảm bảo thanh này luôn nổi lên trên các thành phần khác
+    boxShadow: "0 4px 6px rgba(0,0,0,0.05)", // Đổ bóng nhẹ để nhìn tách biệt với bảng khi cuộn
   },
+
+  // Các style cũ giữ nguyên
   filterGroup: { display: "flex", alignItems: "center" },
   searchGroup: { display: "flex", gap: "5px" },
   label: { marginRight: "10px", fontWeight: "bold" },

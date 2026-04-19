@@ -71,7 +71,7 @@ function ProfilePage() {
         {/* Khối Avatar */}
         <div style={styles.avatarContainer} onClick={handleAvatarClick}>
           <img
-            src={profile.avatarUrl || "https://via.placeholder.com/150"}
+            src={profile.avatarUrl || "/avatar.png"}
             alt="Avatar"
             style={styles.avatarImg}
           />

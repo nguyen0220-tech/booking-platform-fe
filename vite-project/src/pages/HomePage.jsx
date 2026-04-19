@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { logoutApi } from "../api/authApi";
 
 function HomePage() {
   const [user, setUser] = useState(null);
@@ -16,12 +17,22 @@ function HomePage() {
     }
   }, [navigate]);
 
-  // Kiểm tra quyền Admin
+  // Kiểm tra quyền Admin và Provider
   const isAdmin = user?.roles?.some((role) => role.name === "ROLE_ADMIN");
+  const isProvider = user?.roles?.some((role) => role.name === "ROLE_PROVIDER");
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    navigate("/");
+  // Cập nhật hàm handleLogout
+  const handleLogout = async () => {
+    try {
+      // 1. Gọi API để hủy Session Context trên Backend Spring Boot
+      await logoutApi();
+    } catch (error) {
+      console.error("Lỗi khi gọi API logout:", error);
+    } finally {
+      // 2. Luôn luôn thực hiện xóa LocalStorage và chuyển hướng ở Frontend
+      localStorage.removeItem("user");
+      navigate("/");
+    }
   };
 
   if (!user) return null;
@@ -33,10 +44,8 @@ function HomePage() {
         <div style={styles.navBrand}>🏠 CUK Booking</div>
 
         <div style={styles.navLinks}>
-          <button
-            style={styles.navButton}
-            onClick={() => navigate("/profile")} // Sửa dòng này
-          >
+          {/* Nút hiển thị cho tất cả mọi người */}
+          <button style={styles.navButton} onClick={() => navigate("/profile")}>
             <span style={styles.icon}>👤</span> 내 페이지
           </button>
 
@@ -46,6 +55,16 @@ function HomePage() {
           >
             <span style={styles.icon}>📅</span> 예약 내역
           </button>
+
+          {/* Nút chỉ dành cho Provider */}
+          {isProvider && (
+            <button
+              style={styles.navButton}
+              onClick={() => navigate("/products")} // Có thể đổi route tùy ý
+            >
+              <span style={styles.icon}>📦</span> 제품 관리
+            </button>
+          )}
 
           {/* Nút chỉ dành cho Admin */}
           {isAdmin && (
@@ -57,7 +76,7 @@ function HomePage() {
             </button>
           )}
 
-          {/* Thông tin user & Logout */}
+          {/* Thông tin user & Logout (Hiển thị cho tất cả) */}
           <div style={styles.userInfo}>
             <span style={styles.userName}>Hello, {user.fullName}!</span>
             <button style={styles.logoutButton} onClick={handleLogout}>
@@ -67,7 +86,7 @@ function HomePage() {
         </div>
       </nav>
 
-      {/* CONTENT AREA (Nội dung chính sẽ thêm vào đây sau này) */}
+      {/* CONTENT AREA */}
       <main style={styles.mainContent}>
         <div style={styles.placeholderCard}>
           <h2>Chào mừng quay trở lại, {user.fullName}! 👋</h2>
@@ -141,7 +160,7 @@ const styles = {
     gap: "15px",
     marginLeft: "20px",
     paddingLeft: "20px",
-    borderLeft: "1px solid #ddd", // Đường gạch chia cách phần user info
+    borderLeft: "1px solid #ddd",
   },
   userName: {
     fontSize: "14px",
@@ -161,7 +180,7 @@ const styles = {
 
   // -- STYLES CHO CONTENT AREA --
   mainContent: {
-    flex: 1, // Để phần nội dung tự động chiếm hết không gian còn lại
+    flex: 1,
     padding: "30px",
     display: "flex",
     justifyContent: "center",
