@@ -19,7 +19,7 @@ function RegistryResponsePage() {
         setResult({
           loading: false,
           success: false,
-          message: "Mã xác nhận không tồn tại.",
+          message: "존재되지 않은 token",
         });
         return;
       }
@@ -35,7 +35,7 @@ function RegistryResponsePage() {
         setResult({
           loading: false,
           success: false,
-          message: "Có lỗi xảy ra trong quá trình xác thực.",
+          message: "인증 과정에서 오류 발생",
         });
       }
     };
@@ -44,11 +44,7 @@ function RegistryResponsePage() {
   }, [token]);
 
   if (result.loading) {
-    return (
-      <div style={styles.container}>
-        Đang xác thực tài khoản, vui lòng đợi...
-      </div>
-    );
+    return <div style={styles.container}>계정 인증 중...</div>;
   }
 
   return (
@@ -58,12 +54,12 @@ function RegistryResponsePage() {
           {result.success ? "✅" : "❌"}
         </div>
         <h2 style={styles.title}>
-          {result.success ? "Thành công!" : "Thất bại"}
+          {result.success ? "인증 성공!" : "인증 실패"}
         </h2>
         <p style={styles.message}>{result.message}</p>
 
         <button style={styles.button} onClick={() => navigate("/")}>
-          Quay lại trang đăng nhập
+          로그인 홈으로 돌아가기
         </button>
       </div>
     </div>

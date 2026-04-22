@@ -21,6 +21,8 @@ function ProfilePage() {
       const res = await getProfileApi();
       setProfile(res.data); // Map data từ ProfileDTO
     } catch (err) {
+      // Nếu chưa đăng nhập thì đẩy về trang login
+      navigate("/");
       setError(err.message);
     } finally {
       setLoading(false);
@@ -62,11 +64,11 @@ function ProfilePage() {
     <div style={styles.layout}>
       {/* Nút Back về Home */}
       <button style={styles.backBtn} onClick={() => navigate("/home")}>
-        ⬅ Quay lại
+        ⬅ Home
       </button>
 
       <div style={styles.card}>
-        <h2 style={styles.title}>Thông tin cá nhân</h2>
+        <h2 style={styles.title}>개인 정보</h2>
 
         {/* Khối Avatar */}
         <div style={styles.avatarContainer} onClick={handleAvatarClick}>
@@ -86,7 +88,7 @@ function ProfilePage() {
           {/* Lớp phủ khi hover vào ảnh (chỉ hiện khi không upload) */}
           {!uploading && (
             <div className="hover-overlay" style={styles.hoverOverlay}>
-              📷 Đổi ảnh
+              📷 사진 변경
             </div>
           )}
         </div>
@@ -102,7 +104,7 @@ function ProfilePage() {
 
         {/* Thông tin Text */}
         <div style={styles.infoGroup}>
-          <label style={styles.label}>Họ và tên</label>
+          <label style={styles.label}>이름</label>
           <div style={styles.valueBox}>{profile.fullName}</div>
         </div>
 
@@ -112,7 +114,7 @@ function ProfilePage() {
         </div>
 
         <div style={styles.infoGroup}>
-          <label style={styles.label}>Số điện thoại</label>
+          <label style={styles.label}>전화 번호</label>
           <div style={styles.valueBox}>{profile.phone}</div>
         </div>
 
@@ -121,7 +123,7 @@ function ProfilePage() {
           style={styles.editBtn}
           onClick={() => alert("Chức năng sửa thông tin sẽ làm sau!")}
         >
-          ✏️ Sửa thông tin
+          ✏️ 정보 변겅
         </button>
       </div>
     </div>

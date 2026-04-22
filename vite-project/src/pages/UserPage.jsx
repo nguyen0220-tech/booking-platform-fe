@@ -87,7 +87,7 @@ function UserPage() {
         {/* KHU VỰC BỘ LỌC */}
         <div style={styles.filterGroup}>
           <label htmlFor="userFilter" style={styles.label}>
-            Trạng thái:
+            Filter
           </label>
           <select
             id="userFilter"
@@ -98,11 +98,11 @@ function UserPage() {
             }}
             style={styles.select}
           >
-            <option value="ALL">모든 사용자 (Tất cả)</option>
-            <option value="BLOCKED_TRUE">차단됨 (Bị chặn)</option>
-            <option value="BLOCKED_FALSE">정상 (Bình thường)</option>
-            <option value="ENABLED_TRUE">활성화 (Kích hoạt)</option>
-            <option value="ENABLED_FALSE">비활성화 (Vô hiệu)</option>
+            <option value="ALL">모든 사용자</option>
+            <option value="BLOCKED_TRUE">차단됨</option>
+            <option value="BLOCKED_FALSE">정상</option>
+            <option value="ENABLED_TRUE">활성화</option>
+            <option value="ENABLED_FALSE">비활성화</option>
           </select>
         </div>
 
@@ -118,13 +118,13 @@ function UserPage() {
           </select>
           <input
             type="text"
-            placeholder="Nhập từ khóa..."
+            placeholder="검색하세요..."
             value={tempKeyword}
             onChange={(e) => setTempKeyword(e.target.value)}
             style={styles.input}
           />
           <button type="submit" style={styles.buttonSearch}>
-            Tìm kiếm
+            Search
           </button>
           {searchConfig.keyword && (
             <button
@@ -132,7 +132,7 @@ function UserPage() {
               onClick={handleClearSearch}
               style={styles.buttonClear}
             >
-              Xóa tìm
+              검색 취소
             </button>
           )}
         </form>
