@@ -1,13 +1,21 @@
+// LoginPage.jsx
 import { useState, useEffect } from "react";
-import { loginApi, registryApi } from "../api/authApi";
+import { loginApi, registryApi, checkExistInfoApi } from "../api/authApi";
 import { useNavigate } from "react-router-dom";
 
 function LoginPage() {
   const [isRegister, setIsRegister] = useState(false);
   const [loading, setLoading] = useState(false);
   const [generalError, setGeneralError] = useState("");
-  const [successMessage, setSuccessMessage] = useState(""); // State cho thông báo thành công
+  const [successMessage, setSuccessMessage] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
+
+  // THÊM MỚI: State lưu trạng thái kiểm tra (hợp lệ hay đã tồn tại)
+  const [checkStatus, setCheckStatus] = useState({
+    username: null, // { success: true/false, message: "..." }
+    email: null,
+    phone: null,
+  });
 
   const [form, setForm] = useState({
     username: "",
@@ -20,7 +28,6 @@ function LoginPage() {
 
   const navigate = useNavigate();
 
-  // Tự động xóa thông báo thành công sau 5 giây
   useEffect(() => {
     if (successMessage) {
       const timer = setTimeout(() => setSuccessMessage(""), 5000);
@@ -29,9 +36,52 @@ function LoginPage() {
   }, [successMessage]);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-    if (fieldErrors[e.target.name]) {
-      setFieldErrors({ ...fieldErrors, [e.target.name]: "" });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+
+    // Xóa lỗi cũ khi người dùng gõ phím
+    if (fieldErrors[name]) {
+      setFieldErrors({ ...fieldErrors, [name]: "" });
+    }
+    // Reset trạng thái "Check" nếu người dùng thay đổi dữ liệu
+    if (checkStatus[name]) {
+      setCheckStatus({ ...checkStatus, [name]: null });
+    }
+  };
+
+  // THÊM MỚI: Hàm xử lý nút Check
+  const handleCheckExist = async (field, typeEnum) => {
+    const keyword = form[field];
+    if (!keyword) {
+      setCheckStatus({
+        ...checkStatus,
+        [field]: {
+          success: false,
+          message: "Vui lòng nhập thông tin trước khi kiểm tra!",
+        },
+      });
+      return;
+    }
+
+    try {
+      const res = await checkExistInfoApi(typeEnum, keyword);
+      // Xử lý tùy theo cấu trúc ApiResponse của backend
+      // Giả sử res.success = true là hợp lệ (chưa tồn tại)
+      setCheckStatus({
+        ...checkStatus,
+        [field]: {
+          success: true,
+          message: res.message || "Hợp lệ, có thể sử dụng!",
+        },
+      });
+    } catch (err) {
+      setCheckStatus({
+        ...checkStatus,
+        [field]: {
+          success: false,
+          message: err.message || "Thông tin này đã tồn tại!",
+        },
+      });
     }
   };
 
@@ -44,16 +94,12 @@ function LoginPage() {
 
     try {
       if (isRegister) {
-        // Xử lý Đăng ký
         const res = await registryApi(form);
-        // Hiển thị message từ Backend trả về
         setSuccessMessage(res.message || "Registration successful!");
-        setIsRegister(false); // Quay lại màn hình Login
-
-        // Reset form để người dùng đăng nhập
+        setIsRegister(false);
         setForm({ ...form, password: "" });
+        setCheckStatus({ username: null, email: null, phone: null }); // Clear check status
       } else {
-        // Xử lý Đăng nhập
         const res = await loginApi(form.username, form.password);
         localStorage.setItem("user", JSON.stringify(res.data));
         navigate("/home");
@@ -74,7 +120,6 @@ function LoginPage() {
       <form onSubmit={handleSubmit} style={styles.card}>
         <h2 style={styles.title}>{isRegister ? "Create Account" : "Login"}</h2>
 
-        {/* THÔNG BÁO THÀNH CÔNG ĐẸP MẮT */}
         {successMessage && (
           <div style={styles.successBanner}>
             <span style={{ marginRight: "10px" }}>✅</span>
@@ -82,7 +127,6 @@ function LoginPage() {
           </div>
         )}
 
-        {/* THÔNG BÁO LỖI CHUNG */}
         {generalError && (
           <div style={styles.errorBanner}>
             <span style={{ marginRight: "10px" }}>⚠️</span>
@@ -90,22 +134,47 @@ function LoginPage() {
           </div>
         )}
 
+        {/* --- USERNAME --- */}
         <div style={styles.inputGroup}>
-          <input
-            name="username"
-            placeholder="Username"
-            value={form.username}
-            onChange={handleChange}
-            style={{
-              ...styles.input,
-              ...(fieldErrors.username && styles.borderError),
-            }}
-          />
+          <div style={styles.inputRow}>
+            <input
+              name="username"
+              placeholder="Username"
+              value={form.username}
+              onChange={handleChange}
+              style={{
+                ...styles.input,
+                flex: 1, // Kéo dãn input
+                ...(fieldErrors.username && styles.borderError),
+              }}
+            />
+            {isRegister && (
+              <button
+                type="button"
+                style={styles.checkBtn}
+                onClick={() => handleCheckExist("username", "USERNAME")}
+              >
+                Check
+              </button>
+            )}
+          </div>
           {fieldErrors.username && (
             <span style={styles.errorText}>{fieldErrors.username}</span>
           )}
+          {isRegister && checkStatus.username && (
+            <span
+              style={
+                checkStatus.username.success
+                  ? styles.statusTextSuccess
+                  : styles.errorText
+              }
+            >
+              {checkStatus.username.message}
+            </span>
+          )}
         </div>
 
+        {/* --- PASSWORD --- */}
         <div style={styles.inputGroup}>
           <input
             type="password"
@@ -125,6 +194,7 @@ function LoginPage() {
 
         {isRegister && (
           <>
+            {/* --- FULL NAME --- */}
             <div style={styles.inputGroup}>
               <input
                 name="fullName"
@@ -141,39 +211,84 @@ function LoginPage() {
               )}
             </div>
 
+            {/* --- EMAIL --- */}
             <div style={styles.inputGroup}>
-              <input
-                name="email"
-                type="email"
-                placeholder="Email Address"
-                value={form.email}
-                onChange={handleChange}
-                style={{
-                  ...styles.input,
-                  ...(fieldErrors.email && styles.borderError),
-                }}
-              />
+              <div style={styles.inputRow}>
+                <input
+                  name="email"
+                  type="email"
+                  placeholder="Email Address"
+                  value={form.email}
+                  onChange={handleChange}
+                  style={{
+                    ...styles.input,
+                    flex: 1,
+                    ...(fieldErrors.email && styles.borderError),
+                  }}
+                />
+                <button
+                  type="button"
+                  style={styles.checkBtn}
+                  onClick={() => handleCheckExist("email", "EMAIL")}
+                >
+                  Check
+                </button>
+              </div>
               {fieldErrors.email && (
                 <span style={styles.errorText}>{fieldErrors.email}</span>
               )}
-            </div>
-
-            <div style={styles.inputGroup}>
-              <input
-                name="phone"
-                placeholder="Phone (9-11 digits)"
-                value={form.phone}
-                onChange={handleChange}
-                style={{
-                  ...styles.input,
-                  ...(fieldErrors.phone && styles.borderError),
-                }}
-              />
-              {fieldErrors.phone && (
-                <span style={styles.errorText}>{fieldErrors.phone}</span>
+              {checkStatus.email && (
+                <span
+                  style={
+                    checkStatus.email.success
+                      ? styles.statusTextSuccess
+                      : styles.errorText
+                  }
+                >
+                  {checkStatus.email.message}
+                </span>
               )}
             </div>
 
+            {/* --- PHONE --- */}
+            <div style={styles.inputGroup}>
+              <div style={styles.inputRow}>
+                <input
+                  name="phone"
+                  placeholder="Phone (9-11 digits)"
+                  value={form.phone}
+                  onChange={handleChange}
+                  style={{
+                    ...styles.input,
+                    flex: 1,
+                    ...(fieldErrors.phone && styles.borderError),
+                  }}
+                />
+                <button
+                  type="button"
+                  style={styles.checkBtn}
+                  onClick={() => handleCheckExist("phone", "PHONE")}
+                >
+                  Check
+                </button>
+              </div>
+              {fieldErrors.phone && (
+                <span style={styles.errorText}>{fieldErrors.phone}</span>
+              )}
+              {checkStatus.phone && (
+                <span
+                  style={
+                    checkStatus.phone.success
+                      ? styles.statusTextSuccess
+                      : styles.errorText
+                  }
+                >
+                  {checkStatus.phone.message}
+                </span>
+              )}
+            </div>
+
+            {/* --- ROLE --- */}
             <select
               name="role"
               value={form.role}
@@ -201,6 +316,8 @@ function LoginPage() {
               setFieldErrors({});
               setGeneralError("");
               setSuccessMessage("");
+              // Reset check status khi toggle form
+              setCheckStatus({ username: null, email: null, phone: null });
             }}
           >
             {isRegister ? "Login here" : "Register now"}
@@ -212,7 +329,6 @@ function LoginPage() {
 }
 
 const styles = {
-  // ... các style cũ giữ nguyên ...
   wrapper: {
     height: "100vh",
     display: "flex",
@@ -231,8 +347,6 @@ const styles = {
     boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
   },
   title: { textAlign: "center", margin: "0 0 5px 0", color: "#333" },
-
-  // Style cho thông báo thành công
   successBanner: {
     padding: "10px",
     background: "#e6fffa",
@@ -242,8 +356,6 @@ const styles = {
     fontSize: "13px",
     textAlign: "center",
   },
-
-  // Style cho lỗi chung (thay cho p đơn thuần)
   errorBanner: {
     padding: "10px",
     background: "#fff5f5",
@@ -253,8 +365,23 @@ const styles = {
     fontSize: "13px",
     textAlign: "center",
   },
-
   inputGroup: { display: "flex", flexDirection: "column", gap: "3px" },
+
+  // THÊM MỚI: Style cho Flexbox (Input + Button Check)
+  inputRow: { display: "flex", gap: "8px" },
+  checkBtn: {
+    padding: "0 15px",
+    borderRadius: "8px",
+    border: "none",
+    background: "#2196F3",
+    color: "white",
+    fontWeight: "bold",
+    cursor: "pointer",
+    fontSize: "13px",
+    whiteSpace: "nowrap", // Không cho rớt dòng
+  },
+  statusTextSuccess: { color: "#38b2ac", fontSize: "11px", marginLeft: "5px" },
+
   input: {
     padding: "12px",
     borderRadius: "8px",

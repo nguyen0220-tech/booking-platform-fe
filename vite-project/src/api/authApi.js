@@ -33,6 +33,21 @@ export const registryApi = async (registryRequest) => {
   return data;
 };
 
+export const checkExistInfoApi = async (checkType, keyword) => {
+  const res = await fetch(import.meta.env.VITE_API_URL + "/auth/confirm", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ checkType, keyword }),
+  });
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.message || "Check failed");
+  }
+  return data;
+};
+
 export const verifyApi = async (token) => {
   const res = await fetch(
     `${import.meta.env.VITE_API_URL}/auth/verify?token=${token}`,
