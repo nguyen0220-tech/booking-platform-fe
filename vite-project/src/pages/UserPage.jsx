@@ -151,6 +151,7 @@ function UserPage() {
             <th>Roles</th>
             <th>Active</th>
             <th>Status</th>
+            <th>Deleted</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -181,6 +182,9 @@ function UserPage() {
                     </td>
                     <td>
                       {user.infoDetails?.blocked ? "🔴 차단됨" : "🟢 정상"}
+                    </td>
+                    <td>
+                      {user.infoDetails?.deleted ? "🗑️ 삭제됨" : "✔️ 정상"}
                     </td>
                     <td>
                       <button onClick={() => handleView(user)}>View</button>

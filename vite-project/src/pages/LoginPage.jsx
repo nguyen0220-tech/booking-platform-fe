@@ -192,6 +192,22 @@ function LoginPage() {
           )}
         </div>
 
+        {/* THÊM MỚI: Link nhỏ ngay dưới ô Password nếu đang ở mode Login */}
+        {!isRegister && (
+          <div style={{ textAlign: "right", marginTop: "5px" }}>
+            <span
+              style={{
+                ...styles.toggleBtn,
+                fontSize: "12px",
+                textDecoration: "none",
+              }}
+              onClick={() => navigate("/forgot-account")}
+            >
+              아이디/비밀번호 찾기 (Forgot ID/PW?)
+            </span>
+          </div>
+        )}
+
         {isRegister && (
           <>
             {/* --- FULL NAME --- */}

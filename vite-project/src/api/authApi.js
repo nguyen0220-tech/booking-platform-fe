@@ -77,3 +77,66 @@ export const logoutApi = async () => {
 
   return data;
 };
+
+export const forgotUsernameApi = async (email, phone) => {
+  const res = await fetch(
+    import.meta.env.VITE_API_URL + "/auth/find-username",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, phone }),
+    },
+  );
+
+  const data = await res.json();
+
+  if (!res.ok || !data.success) {
+    const error = new Error(data.message || "Không thể tìm thấy tài khoản");
+    error.details = data.data; // Bắt field errors từ @Valid nếu có
+    throw error;
+  }
+  return data;
+};
+
+export const forgotPasswordApi = async (username) => {
+  const res = await fetch(
+    import.meta.env.VITE_API_URL + "/auth/find-password",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username }),
+    },
+  );
+
+  const data = await res.json();
+
+  if (!res.ok || !data.success) {
+    const error = new Error(data.message || "Yêu cầu thất bại");
+    error.details = data.data;
+    throw error;
+  }
+  return data;
+};
+
+export const resetPasswordApi = async (resetData) => {
+  // resetData: token, newPassword, confirmPassword
+  const res = await fetch(
+    import.meta.env.VITE_API_URL + "/auth/reset-password",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(resetData),
+    },
+  );
+
+  const data = await res.json();
+
+  if (!res.ok || !data.success) {
+    const error = new Error(data.message || "비밀번호 재설정 실패");
+    error.details = data.data;
+    throw error;
+  }
+
+  return data;
+};

@@ -13,6 +13,7 @@ export const SEARCH_USER = gql`
         avatarUrl
         enabled
         blocked
+        deleted
         createdAt
       }
     }
@@ -33,6 +34,7 @@ export const GET_USERS = gql`
           avatarUrl
           enabled
           blocked
+          deleted
           createdAt
         }
       }
@@ -64,6 +66,7 @@ export const GET_USERS_FILTER = gql`
           avatarUrl
           enabled
           blocked
+          deleted
           createdAt
         }
       }

@@ -67,7 +67,7 @@ function ProfileVerifyPage() {
         <p style={styles.message}>{result.message}</p>
 
         <button style={styles.button} onClick={() => navigate("/profile")}>
-          프로필로 돌아가기 (Quay lại Profile)
+          프로필로 돌아가기
         </button>
       </div>
     </div>
