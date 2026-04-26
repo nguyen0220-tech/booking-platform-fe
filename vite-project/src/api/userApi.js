@@ -3,50 +3,61 @@ import {
   GET_USERS,
   GET_USERS_FILTER,
   SEARCH_USER,
+  GET_USERS_BY_ROLE,
 } from "../graphql/queries/userQueries";
 
-export const useUsers = (size = 5, filter = null, is = null, search = null) => {
-  // 1. Xác định Mode: SEARCH, FILTER, hoặc ALL
+// Thêm tham số role vào hook
+export const useUsers = (
+  size = 5,
+  filter = null,
+  is = null,
+  search = null,
+  role = null,
+) => {
   const isSearching = !!search?.keyword;
-  const isFiltering = !isSearching && filter !== null && is !== null;
+  const isFilteringStatus = !isSearching && filter !== null && is !== null;
+  const isFilteringRole =
+    !isSearching && !isFilteringStatus && role !== null && role !== "ALL";
 
-  // 2. Chọn Query tương ứng
+  // Chọn Query
   let query = GET_USERS;
   if (isSearching) query = SEARCH_USER;
-  else if (isFiltering) query = GET_USERS_FILTER;
+  else if (isFilteringStatus) query = GET_USERS_FILTER;
+  else if (isFilteringRole) query = GET_USERS_BY_ROLE;
 
-  // 3. Thiết lập Variables
+  // Thiết lập Variables
   const variables = isSearching
     ? { searchType: search.type, keyword: search.keyword }
-    : isFiltering
+    : isFilteringStatus
       ? { page: 0, size, filter, is }
-      : { page: 0, size };
+      : isFilteringRole
+        ? { page: 0, size, role }
+        : { page: 0, size };
 
   const { data, loading, error, fetchMore } = useQuery(query, {
     variables,
     notifyOnNetworkStatusChange: true,
-    skip: isSearching && !search.keyword, // Không gọi search nếu keyword rỗng
+    skip: isSearching && !search.keyword,
   });
 
-  // 4. Chuẩn hóa dữ liệu trả về cho UI
   let normalizedData = { data: [], pageInfo: { hasNext: false } };
 
   if (data) {
-    if (data.user) {
-      // Nếu là kết quả search (1 user), bọc vào mảng
-      normalizedData.data = [data.user];
-    } else if (data.usersFilter) {
-      normalizedData = data.usersFilter;
-    } else if (data.users) {
-      normalizedData = data.users;
-    }
+    if (data.user) normalizedData.data = [data.user];
+    else if (data.usersFilter) normalizedData = data.usersFilter;
+    else if (data.usersFilterByRole)
+      normalizedData = data.usersFilterByRole; // Thêm map data mới
+    else if (data.users) normalizedData = data.users;
   }
 
   const loadMore = () => {
-    // Không load more khi đang search hoặc hết trang
     if (isSearching || !normalizedData.pageInfo?.hasNext) return;
 
-    const responseKey = isFiltering ? "usersFilter" : "users";
+    // Xác định key trả về của query hiện tại để merge data
+    let responseKey = "users";
+    if (isFilteringStatus) responseKey = "usersFilter";
+    if (isFilteringRole) responseKey = "usersFilterByRole";
+
     return fetchMore({
       variables: { ...variables, page: normalizedData.pageInfo.page + 1 },
       updateQuery: (prev, { fetchMoreResult }) => {

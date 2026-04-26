@@ -13,7 +13,6 @@ export const SEARCH_USER = gql`
         avatarUrl
         enabled
         blocked
-        deleted
         createdAt
       }
     }
@@ -34,7 +33,6 @@ export const GET_USERS = gql`
           avatarUrl
           enabled
           blocked
-          deleted
           createdAt
         }
       }
@@ -66,7 +64,32 @@ export const GET_USERS_FILTER = gql`
           avatarUrl
           enabled
           blocked
-          deleted
+          createdAt
+        }
+      }
+      pageInfo {
+        page
+        size
+        hasNext
+      }
+    }
+  }
+`;
+
+export const GET_USERS_BY_ROLE = gql`
+  query GetUsersByRole($page: Int!, $size: Int!, $role: RoleName) {
+    usersFilterByRole(page: $page, size: $size, name: $role) {
+      data {
+        id
+        roles
+        infoDetails {
+          username
+          fullName
+          phone
+          email
+          avatarUrl
+          enabled
+          blocked
           createdAt
         }
       }

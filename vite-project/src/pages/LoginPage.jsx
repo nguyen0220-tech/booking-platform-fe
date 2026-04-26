@@ -1,4 +1,3 @@
-// LoginPage.jsx
 import { useState, useEffect } from "react";
 import { loginApi, registryApi, checkExistInfoApi } from "../api/authApi";
 import { useNavigate } from "react-router-dom";
@@ -10,9 +9,8 @@ function LoginPage() {
   const [successMessage, setSuccessMessage] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
 
-  // THÊM MỚI: State lưu trạng thái kiểm tra (hợp lệ hay đã tồn tại)
   const [checkStatus, setCheckStatus] = useState({
-    username: null, // { success: true/false, message: "..." }
+    username: null,
     email: null,
     phone: null,
   });
@@ -39,17 +37,14 @@ function LoginPage() {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
 
-    // Xóa lỗi cũ khi người dùng gõ phím
     if (fieldErrors[name]) {
       setFieldErrors({ ...fieldErrors, [name]: "" });
     }
-    // Reset trạng thái "Check" nếu người dùng thay đổi dữ liệu
     if (checkStatus[name]) {
       setCheckStatus({ ...checkStatus, [name]: null });
     }
   };
 
-  // THÊM MỚI: Hàm xử lý nút Check
   const handleCheckExist = async (field, typeEnum) => {
     const keyword = form[field];
     if (!keyword) {
@@ -65,8 +60,6 @@ function LoginPage() {
 
     try {
       const res = await checkExistInfoApi(typeEnum, keyword);
-      // Xử lý tùy theo cấu trúc ApiResponse của backend
-      // Giả sử res.success = true là hợp lệ (chưa tồn tại)
       setCheckStatus({
         ...checkStatus,
         [field]: {
@@ -98,7 +91,7 @@ function LoginPage() {
         setSuccessMessage(res.message || "Registration successful!");
         setIsRegister(false);
         setForm({ ...form, password: "" });
-        setCheckStatus({ username: null, email: null, phone: null }); // Clear check status
+        setCheckStatus({ username: null, email: null, phone: null });
       } else {
         const res = await loginApi(form.username, form.password);
         localStorage.setItem("user", JSON.stringify(res.data));
@@ -134,7 +127,6 @@ function LoginPage() {
           </div>
         )}
 
-        {/* --- USERNAME --- */}
         <div style={styles.inputGroup}>
           <div style={styles.inputRow}>
             <input
@@ -144,7 +136,7 @@ function LoginPage() {
               onChange={handleChange}
               style={{
                 ...styles.input,
-                flex: 1, // Kéo dãn input
+                flex: 1,
                 ...(fieldErrors.username && styles.borderError),
               }}
             />
@@ -174,7 +166,6 @@ function LoginPage() {
           )}
         </div>
 
-        {/* --- PASSWORD --- */}
         <div style={styles.inputGroup}>
           <input
             type="password"
@@ -192,7 +183,6 @@ function LoginPage() {
           )}
         </div>
 
-        {/* THÊM MỚI: Link nhỏ ngay dưới ô Password nếu đang ở mode Login */}
         {!isRegister && (
           <div style={{ textAlign: "right", marginTop: "5px" }}>
             <span
@@ -210,7 +200,6 @@ function LoginPage() {
 
         {isRegister && (
           <>
-            {/* --- FULL NAME --- */}
             <div style={styles.inputGroup}>
               <input
                 name="fullName"
@@ -227,7 +216,6 @@ function LoginPage() {
               )}
             </div>
 
-            {/* --- EMAIL --- */}
             <div style={styles.inputGroup}>
               <div style={styles.inputRow}>
                 <input
@@ -266,7 +254,6 @@ function LoginPage() {
               )}
             </div>
 
-            {/* --- PHONE --- */}
             <div style={styles.inputGroup}>
               <div style={styles.inputRow}>
                 <input
@@ -304,7 +291,6 @@ function LoginPage() {
               )}
             </div>
 
-            {/* --- ROLE --- */}
             <select
               name="role"
               value={form.role}
@@ -332,7 +318,6 @@ function LoginPage() {
               setFieldErrors({});
               setGeneralError("");
               setSuccessMessage("");
-              // Reset check status khi toggle form
               setCheckStatus({ username: null, email: null, phone: null });
             }}
           >
@@ -350,17 +335,22 @@ const styles = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    background: "#f0f2f5",
+    // CẬP NHẬT Ở ĐÂY:
+    backgroundImage: "url('/cuk-booking.png')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
+    backgroundColor: "#f0f2f5", // Fallback màu nếu ảnh lỗi
   },
   card: {
-    background: "#fff",
+    background: "rgba(255, 255, 255, 0.95)", // Thêm một chút trong suốt cho card đẹp hơn
     padding: "35px",
     borderRadius: "15px",
     width: "350px",
     display: "flex",
     flexDirection: "column",
     gap: "15px",
-    boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+    boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
   },
   title: { textAlign: "center", margin: "0 0 5px 0", color: "#333" },
   successBanner: {
@@ -382,8 +372,6 @@ const styles = {
     textAlign: "center",
   },
   inputGroup: { display: "flex", flexDirection: "column", gap: "3px" },
-
-  // THÊM MỚI: Style cho Flexbox (Input + Button Check)
   inputRow: { display: "flex", gap: "8px" },
   checkBtn: {
     padding: "0 15px",
@@ -394,10 +382,9 @@ const styles = {
     fontWeight: "bold",
     cursor: "pointer",
     fontSize: "13px",
-    whiteSpace: "nowrap", // Không cho rớt dòng
+    whiteSpace: "nowrap",
   },
   statusTextSuccess: { color: "#38b2ac", fontSize: "11px", marginLeft: "5px" },
-
   input: {
     padding: "12px",
     borderRadius: "8px",

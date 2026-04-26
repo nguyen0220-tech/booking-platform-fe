@@ -1,4 +1,3 @@
-// ForgotAccountPage.jsx
 import { useState, useEffect } from "react";
 import { forgotUsernameApi, forgotPasswordApi } from "../api/authApi";
 import { useNavigate } from "react-router-dom";
@@ -41,20 +40,18 @@ function ForgotAccountPage() {
 
     try {
       if (isFindUsername) {
-        // Gọi API Tìm ID
         const res = await forgotUsernameApi(form.email, form.phone);
         setSuccessMessage(res.message);
-        setFoundUsername(res.data); // Backend trả về id ở trường "data" (vd: "user_45")
+        setFoundUsername(res.data);
       } else {
-        // Gọi API Tìm Mật khẩu
         const res = await forgotPasswordApi(form.username);
         setSuccessMessage(
           res.message || "이메일로 비밀번호 재설정 링크를 보냈습니다.",
-        ); // Đã gửi email reset
+        );
       }
     } catch (err) {
       if (err.details) {
-        setFieldErrors(err.details); // Validation errors từ BE (@NotBlank, @Email...)
+        setFieldErrors(err.details);
       } else {
         setGeneralError(err.message);
       }
@@ -87,7 +84,6 @@ function ForgotAccountPage() {
           </div>
         )}
 
-        {/* Bảng hiển thị kết quả tìm ID thành công */}
         {foundUsername && (
           <div style={styles.resultBanner}>
             <p style={{ margin: "0 0 5px 0" }}>
@@ -106,7 +102,6 @@ function ForgotAccountPage() {
 
         {isFindUsername ? (
           <>
-            {/* --- EMAIL (Dùng cho tìm ID) --- */}
             <div style={styles.inputGroup}>
               <input
                 name="email"
@@ -124,7 +119,6 @@ function ForgotAccountPage() {
               )}
             </div>
 
-            {/* --- PHONE (Dùng cho tìm ID) --- */}
             <div style={styles.inputGroup}>
               <input
                 name="phone"
@@ -144,7 +138,6 @@ function ForgotAccountPage() {
           </>
         ) : (
           <>
-            {/* --- USERNAME (Dùng cho tìm Password) --- */}
             <div style={styles.inputGroup}>
               <input
                 name="username"
@@ -168,7 +161,6 @@ function ForgotAccountPage() {
           {loading ? "처리중..." : "확인"}
         </button>
 
-        {/* Nút quay lại Login (nếu tìm ID xong thì có thể ấn về Đăng nhập ngay) */}
         {foundUsername && (
           <button
             type="button"
@@ -198,7 +190,6 @@ function ForgotAccountPage() {
           </span>
         </p>
 
-        {/* Quay lại trang đăng nhập */}
         <p style={{ ...styles.toggleText, marginTop: "0" }}>
           <span style={styles.toggleBtn} onClick={() => navigate("/")}>
             뒤로 가기 (Back to Login)
@@ -209,24 +200,29 @@ function ForgotAccountPage() {
   );
 }
 
-// Bê nguyên bộ Styles từ LoginPage sang, thêm 1 class cho hiển thị Result
 const styles = {
   wrapper: {
     height: "100vh",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    background: "#f0f2f5",
+    // CHÈN ẢNH NỀN
+    backgroundImage: "url('/cuk-booking.png')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
+    backgroundColor: "#f0f2f5",
   },
   card: {
-    background: "#fff",
+    // ĐỘ TRONG SUỐT NHẸ CHO CARD
+    background: "rgba(255, 255, 255, 0.95)",
     padding: "35px",
     borderRadius: "15px",
     width: "350px",
     display: "flex",
     flexDirection: "column",
     gap: "15px",
-    boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+    boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
   },
   title: { textAlign: "center", margin: "0 0 5px 0", color: "#333" },
   successBanner: {
@@ -239,7 +235,6 @@ const styles = {
     textAlign: "center",
   },
   resultBanner: {
-    // Style mới để hiển thị Username tìm được nổi bật
     padding: "15px",
     background: "#e3f2fd",
     border: "1px solid #90caf9",
