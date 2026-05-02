@@ -7,6 +7,9 @@ import UserPage from "./pages/UserPage";
 import HomePage from "./pages/HomePage";
 import ProfilePage from "./pages/ProfilePage";
 import ProfileVerifyPage from "./pages/ProfileVerifyPage";
+import FacilityPage from "./pages/FacilityPage";
+import FacilityRegistryPage from "./pages/FacilityRegistryPage";
+import FacilityDetailsPage from "./pages/FacilityDetailsPage";
 
 function App() {
   return (
@@ -19,6 +22,12 @@ function App() {
       <Route path="/home" element={<HomePage />} />
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/profile/verify" element={<ProfileVerifyPage />} />
+      <Route path="/facilities" element={<FacilityPage />} />
+      <Route path="/facility-registry" element={<FacilityRegistryPage />} />
+      <Route
+        path="/facility-details/:id"
+        element={<FacilityDetailsPage />}
+      />{" "}
     </Routes>
   );
 }

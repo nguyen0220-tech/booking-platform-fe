@@ -24,12 +24,10 @@ function HomePage() {
   // Cập nhật hàm handleLogout
   const handleLogout = async () => {
     try {
-      // 1. Gọi API để hủy Session Context trên Backend Spring Boot
       await logoutApi();
     } catch (error) {
       console.error("Lỗi khi gọi API logout:", error);
     } finally {
-      // 2. Luôn luôn thực hiện xóa LocalStorage và chuyển hướng ở Frontend
       localStorage.removeItem("user");
       navigate("/");
     }
@@ -60,7 +58,7 @@ function HomePage() {
           {isProvider && (
             <button
               style={styles.navButton}
-              onClick={() => navigate("/products")} // Có thể đổi route tùy ý
+              onClick={() => navigate("/facilities")}
             >
               <span style={styles.icon}>📦</span> 제품 관리
             </button>
@@ -68,15 +66,25 @@ function HomePage() {
 
           {/* Nút chỉ dành cho Admin */}
           {isAdmin && (
-            <button
-              style={{ ...styles.navButton, ...styles.adminNavButton }}
-              onClick={() => navigate("/users")}
-            >
-              <span style={styles.icon}>🛡️</span> 사용자 관리
-            </button>
+            <>
+              <button
+                style={{ ...styles.navButton, ...styles.adminNavButton }}
+                onClick={() => navigate("/users")}
+              >
+                <span style={styles.icon}>🛡️</span> 사용자 관리
+              </button>
+
+              {/* Nút mới: Quản lý yêu cầu đăng ký */}
+              <button
+                style={{ ...styles.navButton, ...styles.adminNavButton }}
+                onClick={() => navigate("/registration-requests")}
+              >
+                <span style={styles.icon}>📋</span> 등록요청관리
+              </button>
+            </>
           )}
 
-          {/* Thông tin user & Logout (Hiển thị cho tất cả) */}
+          {/* Thông tin user & Logout */}
           <div style={styles.userInfo}>
             <span style={styles.userName}>Hello, {user.fullName}!</span>
             <button style={styles.logoutButton} onClick={handleLogout}>
