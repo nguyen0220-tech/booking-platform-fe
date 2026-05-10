@@ -2,6 +2,8 @@ import {
   GET_FACILITIES,
   GET_FACILITIES_BY_KEYWORD,
   GET_FACILITY_DETAIL,
+  GET_FACILITY_REGISTRATION_LIST,
+  GET_FACILITY_REGISTRATION_DETAIL,
 } from "../graphql/queries/facilityQueries";
 import { getCookie } from "../api/cookie";
 
@@ -126,4 +128,59 @@ export const createFacilityApi = async (facilityData) => {
     throw new Error(errorData.message || "Lỗi khi tạo cơ sở");
   }
   return await response.json();
+};
+
+export const fetchFacilityRegistrationListApi = async (
+  status,
+  page = 0,
+  size = 5,
+) => {
+  try {
+    const response = await fetch(import.meta.env.VITE_API_URL + "/graphql", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getCsrfHeaders(),
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        query: GET_FACILITY_REGISTRATION_LIST,
+        variables: { status, page, size },
+      }),
+    });
+
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const result = await response.json();
+    if (result.errors) throw new Error(result.errors[0].message);
+    return result.data.facilityRegistrationList;
+  } catch (error) {
+    console.error("Lỗi fetchFacilityRegistrationListApi:", error);
+    throw error;
+  }
+};
+
+export const fetchFacilityRegistrationDetailApi = async (id) => {
+  try {
+    const response = await fetch(import.meta.env.VITE_API_URL + "/graphql", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getCsrfHeaders(),
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        query: GET_FACILITY_REGISTRATION_DETAIL,
+        variables: { id },
+      }),
+    });
+
+    if (!response.ok) throw new Error(`HTTP $\{response.status\}`);
+    const result = await response.json();
+    if (result.errors) throw new Error(result.errors[0].message);
+
+    return result.data.facilityRegistration;
+  } catch (error) {
+    console.error("Lỗi fetchFacilityRegistrationDetailApi:", error);
+    throw error;
+  }
 };

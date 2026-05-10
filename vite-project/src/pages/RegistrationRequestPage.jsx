@@ -1,9 +1,16 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { fetchFacilitiesApi, searchFacilitiesApi } from "../api/facilityApi";
+import { fetchFacilityRegistrationListApi } from "../api/facilityApi";
 
-function FacilityPage() {
+const STATUS_TABS = [
+  { key: "PENDING", label: "⏳ 대기중" },
+  { key: "APPROVED", label: "✅ 승인됨" },
+  { key: "REJECTED", label: "❌ 거절됨" },
+];
+
+function RegistrationRequestPage() {
   const [user, setUser] = useState(null);
+  const [activeStatus, setActiveStatus] = useState("PENDING");
   const [facilities, setFacilities] = useState([]);
   const [pageInfo, setPageInfo] = useState({
     page: 0,
@@ -12,8 +19,6 @@ function FacilityPage() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [keyword, setKeyword] = useState("");
-  const [activeKeyword, setActiveKeyword] = useState(""); // keyword đang được áp dụng
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,14 +30,16 @@ function FacilityPage() {
     }
   }, [navigate]);
 
-  const loadFacilities = useCallback(
-    async (page = 0, searchKeyword = "") => {
+  const loadList = useCallback(
+    async (status, page = 0) => {
       setLoading(true);
       setError(null);
       try {
-        const result = searchKeyword
-          ? await searchFacilitiesApi(searchKeyword, page, pageInfo.size)
-          : await fetchFacilitiesApi(page, pageInfo.size);
+        const result = await fetchFacilityRegistrationListApi(
+          status,
+          page,
+          pageInfo.size,
+        );
         setFacilities(result.data);
         setPageInfo(result.pageInfo);
       } catch (err) {
@@ -45,23 +52,12 @@ function FacilityPage() {
   );
 
   useEffect(() => {
-    if (user) loadFacilities(0, "");
-  }, [user]);
+    if (user) loadList(activeStatus, 0);
+  }, [user, activeStatus]);
 
-  const handleSearch = () => {
-    const trimmed = keyword.trim();
-    setActiveKeyword(trimmed);
-    loadFacilities(0, trimmed);
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") handleSearch();
-  };
-
-  const handleReset = () => {
-    setKeyword("");
-    setActiveKeyword("");
-    loadFacilities(0, "");
+  const handleTabChange = (status) => {
+    setActiveStatus(status);
+    setFacilities([]);
   };
 
   const getTypeLabel = (type) => {
@@ -71,20 +67,6 @@ function FacilityPage() {
       Restaurant: "🍽️ 음식점",
     };
     return map[type] || type;
-  };
-
-  const getStatusBadge = (status) => {
-    const map = {
-      APPROVED: { label: "승인됨", color: "#2ecc71" },
-      PENDING: { label: "대기중", color: "#f39c12" },
-      REJECTED: { label: "거절됨", color: "#e74c3c" },
-    };
-    const s = map[status] || { label: status, color: "#95a5a6" };
-    return (
-      <span style={{ ...styles.badge, backgroundColor: s.color }}>
-        {s.label}
-      </span>
-    );
   };
 
   if (!user) return null;
@@ -97,62 +79,28 @@ function FacilityPage() {
           <button style={styles.backButton} onClick={() => navigate("/home")}>
             ⬅ Quay lại
           </button>
-          <h1 style={styles.pageTitle}>📦 시설 관리</h1>
+          <h1 style={styles.pageTitle}>📋 시설 등록 요청 관리</h1>
         </div>
       </header>
 
       <main style={styles.mainContent}>
-        {/* ACTION BAR */}
-        <div style={styles.actionBar}>
-          <div style={styles.actionLeft}>
+        {/* STATUS TABS */}
+        <div style={styles.tabBar}>
+          {STATUS_TABS.map((tab) => (
             <button
-              style={{ ...styles.actionButton, ...styles.btnPrimary }}
-              onClick={() => navigate("/facility-registry")}
+              key={tab.key}
+              style={{
+                ...styles.tabBtn,
+                ...(activeStatus === tab.key ? styles.tabBtnActive : {}),
+              }}
+              onClick={() => handleTabChange(tab.key)}
             >
-              <span style={styles.icon}>➕</span> 제품 등록하기
+              {tab.label}
             </button>
-            <button
-              style={{ ...styles.actionButton, ...styles.btnInfo }}
-              onClick={() => console.log("Mở danh sách quản lý đặt chỗ")}
-            >
-              <span style={styles.icon}>📅</span> 예약 관리
-            </button>
-          </div>
-
-          <div style={styles.searchBox}>
-            <input
-              style={styles.searchInput}
-              type="text"
-              placeholder="🔍 시설명 검색..."
-              value={keyword}
-              onChange={(e) => setKeyword(e.target.value)}
-              onKeyDown={handleKeyDown}
-            />
-            {activeKeyword && (
-              <button
-                style={{ ...styles.actionButton, ...styles.btnReset }}
-                onClick={handleReset}
-              >
-                ✕ 초기화
-              </button>
-            )}
-            <button
-              style={{ ...styles.actionButton, ...styles.btnSearch }}
-              onClick={handleSearch}
-            >
-              검색
-            </button>
-          </div>
+          ))}
         </div>
 
-        {/* Hiển thị đang tìm kiếm theo từ khóa nào */}
-        {activeKeyword && (
-          <p style={styles.searchHint}>
-            🔎 <strong>"{activeKeyword}"</strong> 검색 결과
-          </p>
-        )}
-
-        {/* CONTENT AREA */}
+        {/* CONTENT */}
         <div style={styles.contentArea}>
           {loading && <p style={styles.statusText}>⏳ 불러오는 중...</p>}
           {error && (
@@ -160,11 +108,7 @@ function FacilityPage() {
           )}
 
           {!loading && !error && facilities.length === 0 && (
-            <p style={styles.statusText}>
-              {activeKeyword
-                ? `"${activeKeyword}"에 대한 검색 결과가 없습니다.`
-                : "등록된 시설이 없습니다."}
-            </p>
+            <p style={styles.statusText}>해당 상태의 요청이 없습니다.</p>
           )}
 
           {!loading && !error && facilities.length > 0 && (
@@ -175,25 +119,28 @@ function FacilityPage() {
                     <tr style={styles.theadRow}>
                       <th style={styles.th}>ID</th>
                       <th style={styles.th}>시설 유형</th>
-                      <th style={styles.th}>이름</th>
+                      <th style={styles.th}>시설명</th>
                       <th style={styles.th}>주소</th>
-                      <th style={styles.th}>상태</th>
-                      <th style={styles.th}>비고</th>
-                      <th style={styles.th}>활성</th>
-                      <th style={styles.th}>정지 여부</th>
+                      <th style={styles.th}>소유자</th>
+                      <th style={styles.th}>전화번호</th>
+                      <th style={styles.th}>이메일</th>
                       <th style={styles.th}>등록일</th>
                     </tr>
                   </thead>
                   <tbody>
                     {facilities.map((facility, idx) => {
                       const info = facility.facilityInfo || {};
-                      const approval = facility.approvalStatus || {};
+                      const owner = facility.owner || {};
+                      const ownerInfo = owner.infoDetails || {};
                       return (
                         <tr
-                          key={facility.id}
+                          key={facility.facilityRegistrationId}
                           style={idx % 2 === 0 ? styles.trEven : styles.trOdd}
                           onClick={() =>
-                            navigate(`/facility-details/${facility.id}`)
+                            navigate(
+                              // ✅ Dùng facilityRegistrationId để navigate đến detail
+                              `/registration-requests/details/${facility.facilityRegistrationId}`,
+                            )
                           }
                           onMouseEnter={(e) =>
                             (e.currentTarget.style.backgroundColor = "#eef4fb")
@@ -203,34 +150,38 @@ function FacilityPage() {
                               idx % 2 === 0 ? "#fff" : "#fafbfc")
                           }
                         >
-                          <td style={styles.td}>{facility.id}</td>
+                          {/* Hiển thị facilityRegistrationId ở cột ID */}
+                          <td style={styles.td}>
+                            {facility.facilityRegistrationId}
+                          </td>
                           <td style={styles.td}>
                             {getTypeLabel(facility.facilityType)}
                           </td>
                           <td style={styles.td}>{info.name || "-"}</td>
                           <td style={styles.td}>{info.address || "-"}</td>
                           <td style={styles.td}>
-                            {getStatusBadge(approval.status)}
+                            <div style={styles.ownerCell}>
+                              {ownerInfo.avatarUrl ? (
+                                <img
+                                  src={ownerInfo.avatarUrl}
+                                  alt={ownerInfo.fullName}
+                                  style={styles.avatar}
+                                  onError={(e) => {
+                                    e.target.style.display = "none";
+                                  }}
+                                />
+                              ) : (
+                                <div style={styles.avatarFallback}>
+                                  {ownerInfo.fullName
+                                    ? ownerInfo.fullName.charAt(0).toUpperCase()
+                                    : "?"}
+                                </div>
+                              )}
+                              <span>{ownerInfo.fullName || "-"}</span>
+                            </div>
                           </td>
-                          <td style={styles.td}>{approval.note || "-"}</td>
-                          <td style={styles.td}>
-                            <span
-                              style={{
-                                color: info.active ? "#2ecc71" : "#e74c3c",
-                              }}
-                            >
-                              {info.active ? "✅" : "❌"}
-                            </span>
-                          </td>
-                          <td style={styles.td}>
-                            <span
-                              style={{
-                                color: info.isSuspended ? "#e74c3c" : "#2ecc71",
-                              }}
-                            >
-                              {info.isSuspended ? "🚫 정지됨" : "✅ 정상"}
-                            </span>
-                          </td>
+                          <td style={styles.td}>{ownerInfo.phone || "-"}</td>
+                          <td style={styles.td}>{ownerInfo.email || "-"}</td>
                           <td style={styles.td}>
                             {info.createdAt
                               ? new Date(info.createdAt).toLocaleDateString(
@@ -250,9 +201,7 @@ function FacilityPage() {
                 <button
                   style={styles.pageBtn}
                   disabled={pageInfo.page === 0}
-                  onClick={() =>
-                    loadFacilities(pageInfo.page - 1, activeKeyword)
-                  }
+                  onClick={() => loadList(activeStatus, pageInfo.page - 1)}
                 >
                   ◀ 이전
                 </button>
@@ -260,9 +209,7 @@ function FacilityPage() {
                 <button
                   style={styles.pageBtn}
                   disabled={!pageInfo.hasNext}
-                  onClick={() =>
-                    loadFacilities(pageInfo.page + 1, activeKeyword)
-                  }
+                  onClick={() => loadList(activeStatus, pageInfo.page + 1)}
                 >
                   다음 ▶
                 </button>
@@ -300,50 +247,22 @@ const styles = {
   },
   pageTitle: { fontSize: "22px", color: "#2c3e50", margin: 0 },
   mainContent: { padding: "30px", maxWidth: "1200px", margin: "0 auto" },
-  actionBar: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "25px",
-    flexWrap: "wrap",
-    gap: "15px",
-  },
-  actionLeft: { display: "flex", gap: "15px", flexWrap: "wrap" },
-  searchBox: { display: "flex", gap: "8px", alignItems: "center" },
-  searchInput: {
-    padding: "9px 14px",
+  tabBar: { display: "flex", gap: "10px", marginBottom: "24px" },
+  tabBtn: {
+    padding: "10px 24px",
     fontSize: "14px",
-    borderRadius: "6px",
-    border: "1px solid #ddd",
-    outline: "none",
-    width: "220px",
-  },
-  searchHint: {
-    fontSize: "14px",
-    color: "#7f8c8d",
-    marginBottom: "12px",
-    marginTop: "-10px",
-  },
-  actionButton: {
-    padding: "10px 20px",
-    fontSize: "15px",
     fontWeight: "600",
     borderRadius: "6px",
-    border: "none",
-    cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-  },
-  icon: { marginRight: "8px", fontSize: "16px" },
-  btnPrimary: { backgroundColor: "#3498db", color: "#fff" },
-  btnInfo: { backgroundColor: "#2ecc71", color: "#fff" },
-  btnSearch: { backgroundColor: "#8e44ad", color: "#fff" },
-  btnReset: {
-    backgroundColor: "#fff",
-    color: "#7f8c8d",
     border: "1px solid #ddd",
-    boxShadow: "none",
+    backgroundColor: "#fff",
+    cursor: "pointer",
+    color: "#7f8c8d",
+    transition: "all 0.2s",
+  },
+  tabBtnActive: {
+    backgroundColor: "#3498db",
+    color: "#fff",
+    border: "1px solid #3498db",
   },
   contentArea: {
     backgroundColor: "#fff",
@@ -378,13 +297,32 @@ const styles = {
   },
   trEven: { backgroundColor: "#fff", cursor: "pointer" },
   trOdd: { backgroundColor: "#fafbfc", cursor: "pointer" },
-  badge: {
-    display: "inline-block",
-    padding: "3px 10px",
-    borderRadius: "12px",
+  ownerCell: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "8px",
+  },
+  avatar: {
+    width: "32px",
+    height: "32px",
+    borderRadius: "50%",
+    objectFit: "cover",
+    border: "1px solid #ddd",
+    flexShrink: 0,
+  },
+  avatarFallback: {
+    width: "32px",
+    height: "32px",
+    borderRadius: "50%",
+    backgroundColor: "#3498db",
     color: "#fff",
-    fontSize: "12px",
-    fontWeight: "600",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "13px",
+    fontWeight: "700",
+    flexShrink: 0,
   },
   pagination: {
     display: "flex",
@@ -405,4 +343,4 @@ const styles = {
   pageInfo: { fontSize: "14px", color: "#7f8c8d" },
 };
 
-export default FacilityPage;
+export default RegistrationRequestPage;
