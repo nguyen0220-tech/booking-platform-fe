@@ -140,6 +140,7 @@ export const GET_FACILITY_REGISTRATION_DETAIL = `
           createdAt
           updatedAt
         }
+        imageUrls
         owner {
           id
           infoDetails {

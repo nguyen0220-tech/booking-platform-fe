@@ -111,6 +111,28 @@ export const uploadImagesApi = async (files) => {
   return result.data;
 };
 
+// Thêm ảnh vào DB cho facility
+export const addFacilityImagesApi = async (facilityId, imageUrls) => {
+  const response = await fetch(
+    import.meta.env.VITE_API_URL + "/facility/add-images",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getCsrfHeaders(),
+      },
+      credentials: "include",
+      body: JSON.stringify({ facilityId: Number(facilityId), imageUrls }),
+    },
+  );
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Thêm ảnh thất bại");
+  }
+  return await response.json();
+};
+
 // 2. API Tạo Facility
 export const createFacilityApi = async (facilityData) => {
   const response = await fetch(import.meta.env.VITE_API_URL + "/facility", {
@@ -126,6 +148,63 @@ export const createFacilityApi = async (facilityData) => {
   if (!response.ok) {
     const errorData = await response.json();
     throw new Error(errorData.message || "Lỗi khi tạo cơ sở");
+  }
+  return await response.json();
+};
+
+export const updateFacilityOptionApi = async (facilityId, options) => {
+  const optionStates = [
+    { option: "ACTIVE", state: options.active ?? false },
+    { option: "CAR_PARK", state: options.carPark ?? false },
+    { option: "HAS_WIFI", state: options.hasWifi ?? false },
+  ];
+
+  const response = await fetch(
+    import.meta.env.VITE_API_URL + "/facility/option",
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        ...getCsrfHeaders(),
+      },
+      credentials: "include",
+      body: JSON.stringify({ facilityId: Number(facilityId), optionStates }),
+    },
+  );
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "옵션 업데이트 실패");
+  }
+  return await response.json();
+};
+
+// Cập nhật info của facility (tùy type)
+export const updateFacilityInfoApi = async (
+  facilityId,
+  facilityType,
+  infoData,
+) => {
+  const response = await fetch(
+    import.meta.env.VITE_API_URL + "/facility/info",
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        ...getCsrfHeaders(),
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        facilityId: Number(facilityId),
+        type: facilityType, // "SPORT" | "MOTEL" | "RESTAURANT"
+        ...infoData,
+      }),
+    },
+  );
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "정보 업데이트 실패");
   }
   return await response.json();
 };
@@ -181,6 +260,35 @@ export const fetchFacilityRegistrationDetailApi = async (id) => {
     return result.data.facilityRegistration;
   } catch (error) {
     console.error("Lỗi fetchFacilityRegistrationDetailApi:", error);
+    throw error;
+  }
+};
+
+export const handleFacilityRegistrationApi = async ({ id, status, note }) => {
+  try {
+    const response = await fetch(
+      import.meta.env.VITE_API_URL + "/facility-registration",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...getCsrfHeaders(),
+        },
+        credentials: "include",
+        body: JSON.stringify({ id, status, note }),
+      },
+    );
+
+    if (!response.ok) {
+      const errBody = await response.text();
+      console.error("BE error body:", errBody); // <-- xem log này
+      throw new Error(`HTTP ${response.status}`);
+    }
+    const result = await response.json();
+    if (result.error) throw new Error(result.message || "처리 실패");
+    return result;
+  } catch (error) {
+    console.error("Lỗi handleFacilityRegistrationApi:", error);
     throw error;
   }
 };
