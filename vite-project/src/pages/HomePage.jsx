@@ -20,6 +20,7 @@ function HomePage() {
   // Kiểm tra quyền Admin và Provider
   const isAdmin = user?.roles?.some((role) => role.name === "ROLE_ADMIN");
   const isProvider = user?.roles?.some((role) => role.name === "ROLE_PROVIDER");
+  const isUser = user?.roles?.some((role) => role.name === "ROLE_USER");
 
   // Cập nhật hàm handleLogout
   const handleLogout = async () => {
@@ -47,12 +48,15 @@ function HomePage() {
             <span style={styles.icon}>👤</span> 내 페이지
           </button>
 
-          <button
-            style={styles.navButton}
-            onClick={() => console.log("Reservations")}
-          >
-            <span style={styles.icon}>📅</span> 예약 내역
-          </button>
+          {/* Nút chỉ dành cho Provider */}
+          {isUser && !isAdmin && (
+            <button
+              style={styles.navButton}
+              onClick={() => console.log("Reservations")}
+            >
+              <span style={styles.icon}>📅</span> 예약 내역
+            </button>
+          )}
 
           {/* Nút chỉ dành cho Provider */}
           {isProvider && (

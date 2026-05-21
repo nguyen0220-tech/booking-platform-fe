@@ -390,6 +390,13 @@ const titleByType = {
   RESTAURANT: "🍽️ 음식점 정보 수정",
 };
 
+const ModalField = ({ label, children }) => (
+  <div style={modalStyles.formGroup}>
+    <label style={modalStyles.formLabel}>{label}</label>
+    {children}
+  </div>
+);
+
 function InfoModal({
   facilityId,
   facilityType,
@@ -405,6 +412,8 @@ function InfoModal({
   const [hourPrice, setHourPrice] = useState(target?.hourPrice ?? "");
   const [nightPrice, setNightPrice] = useState(target?.nightPrice ?? "");
   const [foodType, setFoodType] = useState(target?.foodType ?? "");
+  const [openTime, setOpenTime] = useState(target?.openTime ?? "");
+  const [closeTime, setCloseTime] = useState(target?.closeTime ?? "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -420,7 +429,8 @@ function InfoModal({
           hourPrice: Number(hourPrice),
           nightPrice: Number(nightPrice),
         };
-      if (facilityType === "RESTAURANT") extra = { foodType };
+      if (facilityType === "RESTAURANT")
+        extra = { foodType, openTime, closeTime };
 
       const updated = { ...base, ...extra };
       await updateFacilityInfoApi(facilityId, facilityType, updated);
@@ -432,13 +442,6 @@ function InfoModal({
       setLoading(false);
     }
   };
-
-  const Field = ({ label, children }) => (
-    <div style={modalStyles.formGroup}>
-      <label style={modalStyles.formLabel}>{label}</label>
-      {children}
-    </div>
-  );
 
   return (
     <div
@@ -461,42 +464,42 @@ function InfoModal({
         </h2>
 
         {/* ── 공통 필드 ── */}
-        <Field label="시설명">
+        <ModalField label="시설명">
           <input
             style={modalStyles.formInput}
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="시설명을 입력하세요"
           />
-        </Field>
-        <Field label="주소">
+        </ModalField>
+        <ModalField label="주소">
           <input
             style={modalStyles.formInput}
             value={address}
             onChange={(e) => setAddress(e.target.value)}
             placeholder="주소를 입력하세요"
           />
-        </Field>
-        <Field label="시설 설명">
+        </ModalField>
+        <ModalField label="시설 설명">
           <textarea
             style={modalStyles.formTextarea}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="시설 설명을 입력하세요"
           />
-        </Field>
-        <Field label="찾아오는 방법">
+        </ModalField>
+        <ModalField label="찾아오는 방법">
           <textarea
             style={modalStyles.formTextarea}
             value={instruction}
             onChange={(e) => setInstruction(e.target.value)}
             placeholder="찾아오는 방법을 입력하세요"
           />
-        </Field>
+        </ModalField>
 
         {/* ── SPORT ── */}
         {facilityType === "SPORT" && (
-          <Field label="⚽ 시간당 가격 (원)">
+          <ModalField label="⚽ 시간당 가격 (원)">
             <input
               style={modalStyles.formInput}
               type="number"
@@ -505,13 +508,13 @@ function InfoModal({
               onChange={(e) => setHourPrice(e.target.value)}
               placeholder="예: 10000"
             />
-          </Field>
+          </ModalField>
         )}
 
         {/* ── MOTEL ── */}
         {facilityType === "MOTEL" && (
           <>
-            <Field label="🏨 시간당 가격 (원)">
+            <ModalField label="🏨 시간당 가격 (원)">
               <input
                 style={modalStyles.formInput}
                 type="number"
@@ -520,8 +523,8 @@ function InfoModal({
                 onChange={(e) => setHourPrice(e.target.value)}
                 placeholder="예: 15000"
               />
-            </Field>
-            <Field label="🌙 1박 가격 (원)">
+            </ModalField>
+            <ModalField label="🌙 1박 가격 (원)">
               <input
                 style={modalStyles.formInput}
                 type="number"
@@ -530,47 +533,69 @@ function InfoModal({
                 onChange={(e) => setNightPrice(e.target.value)}
                 placeholder="예: 60000"
               />
-            </Field>
+            </ModalField>
           </>
         )}
 
         {/* ── RESTAURANT ── */}
         {facilityType === "RESTAURANT" && (
-          <Field label="🍴 음식 종류">
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3,1fr)",
-                gap: "8px",
-                marginTop: "4px",
-              }}
-            >
-              {FOOD_TYPES.map(({ value, label }) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setFoodType(value)}
-                  style={{
-                    padding: "9px 6px",
-                    borderRadius: "8px",
-                    fontSize: "12px",
-                    cursor: "pointer",
-                    fontFamily: "inherit",
-                    transition: "all .15s",
-                    background:
-                      foodType === value
-                        ? "linear-gradient(135deg,#11998e,#38ef7d)"
-                        : "#f0f2f7",
-                    color: foodType === value ? "#fff" : "#2c3e50",
-                    border: foodType === value ? "none" : "1.5px solid #e2e6ee",
-                    fontWeight: foodType === value ? "700" : "500",
-                  }}
-                >
-                  {label} {/* ← hiển thị tiếng Hàn, gửi API value enum */}
-                </button>
-              ))}
+          <>
+            <ModalField label="🍴 음식 종류">
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(3,1fr)",
+                  gap: "8px",
+                  marginTop: "4px",
+                }}
+              >
+                {FOOD_TYPES.map(({ value, label }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setFoodType(value)}
+                    style={{
+                      padding: "9px 6px",
+                      borderRadius: "8px",
+                      fontSize: "12px",
+                      cursor: "pointer",
+                      fontFamily: "inherit",
+                      transition: "all .15s",
+                      background:
+                        foodType === value
+                          ? "linear-gradient(135deg,#11998e,#38ef7d)"
+                          : "#f0f2f7",
+                      color: foodType === value ? "#fff" : "#2c3e50",
+                      border:
+                        foodType === value ? "none" : "1.5px solid #e2e6ee",
+                      fontWeight: foodType === value ? "700" : "500",
+                    }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </ModalField>
+
+            <div style={{ display: "flex", gap: "12px" }}>
+              <ModalField label="⏰ 영업 시작 시간">
+                <input
+                  style={modalStyles.formInput}
+                  type="time"
+                  value={openTime}
+                  onChange={(e) => setOpenTime(e.target.value)}
+                />
+              </ModalField>
+              <ModalField label="⏰ 영업 종료 시간">
+                <input
+                  style={modalStyles.formInput}
+                  type="time"
+                  value={closeTime}
+                  onChange={(e) => setCloseTime(e.target.value)}
+                />
+              </ModalField>
             </div>
-          </Field>
+          </>
         )}
         {error && (
           <p
@@ -706,9 +731,34 @@ function FacilityDetailsPage() {
         );
       case "Restaurant":
         return (
+          <>
+            <div style={styles.infoGrid}>
+              <InfoItem label="유형" value="🍽️ 음식점" />
+              <InfoItem label="음식 종류" value={target.foodType} />
+              <InfoItem label="⏰ 영업 시작" value={target.openTime || "-"} />
+              <InfoItem label="⏰ 영업 종료" value={target.closeTime || "-"} />
+            </div>
+            {/* ← THÊM NÚT */}
+            <button
+              style={styles.btnMenu}
+              onClick={() => navigate(`/facilities/${id}/menus`)}
+            >
+              🍴 메뉴 관리
+            </button>
+          </>
+        );
+        return (
           <div style={styles.infoGrid}>
             <InfoItem label="유형" value="🍽️ 음식점" />
             <InfoItem label="음식 종류" value={target.foodType} />
+            <InfoItem
+              label="⏰ 영업 시작"
+              value={target.openTime || "-"}
+            />{" "}
+            <InfoItem
+              label="⏰ 영업 종료"
+              value={target.closeTime || "-"}
+            />{" "}
           </div>
         );
       default:

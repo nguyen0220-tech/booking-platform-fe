@@ -81,8 +81,54 @@ export const GET_FACILITY_DETAIL = `
         }
         ... on Restaurant {
           foodType
+          openTime
+          closeTime
+          menus {
+            id
+            name
+            description
+            price
+            imageUrl
+        }
         }
       }
+    }
+  }
+`;
+
+export const GET_RESTAURANT_MENUS = `
+  query GetRestaurantMenus($id: ID!) {
+    facility(id: $id) {
+      facilityInfo{
+      name
+      description
+      address
+    }
+    facilityTarget {
+      __typename
+      ... on Sport {
+        hourPrice
+      }
+
+      ... on Motel {
+        nightPrice
+        hourPrice
+      }
+      ... on Restaurant {
+        foodType
+        openTime
+        closeTime
+        menus {
+          id
+          name
+          description
+          price
+          imageUrl
+          deleted
+          soldOut
+        }
+      }
+    }
     }
   }
 `;
@@ -162,6 +208,8 @@ export const GET_FACILITY_REGISTRATION_DETAIL = `
           }
           ... on Restaurant {
             foodType
+            openTime
+            closeTime
           }
         }
       }

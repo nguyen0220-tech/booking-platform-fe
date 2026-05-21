@@ -58,7 +58,13 @@ const RenderTarget = ({ t }) => {
     );
   }
   if (t.__typename === "Restaurant") {
-    return <Field label="음식 유형" value={t.foodType} />;
+    return (
+      <>
+        <Field label="음식 유형" value={t.foodType} />
+        <Field label="⏰ 영업 시작" value={t.openTime || "-"} />
+        <Field label="⏰ 영업 종료" value={t.closeTime || "-"} />
+      </>
+    );
   }
   return null;
 };

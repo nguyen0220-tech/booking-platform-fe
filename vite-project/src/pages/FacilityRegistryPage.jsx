@@ -14,6 +14,8 @@ const initialFacilityState = {
   hourPrice: "",
   nightPrice: "",
   foodType: "KOREAN_FOOD",
+  openTime: "",
+  closeTime: "",
 };
 
 function FacilityRegistryPage() {
@@ -117,7 +119,7 @@ function FacilityRegistryPage() {
                 >
                   <option value="SPORT">⚽ 스포츠</option>
                   <option value="MOTEL">🏨 모텔</option>
-                  <option value="RESTAURANT">🍽️ 음식점</option>
+                  <option value="RESTAURANT">🍽️ 레스토랑</option>
                 </select>
               </div>
 
@@ -211,45 +213,100 @@ function FacilityRegistryPage() {
             )}
 
             {newFacility.type === "MOTEL" && (
-              <div style={styles.formRow}>
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>시간당 가격 (원)</label>
-                  <input
-                    type="number"
-                    style={styles.input}
-                    placeholder="예: 20000"
-                    value={newFacility.hourPrice}
-                    onChange={(e) => handleChange("hourPrice", e.target.value)}
-                  />
+              <>
+                <div style={styles.formRow}>
+                  <div style={styles.formGroup}>
+                    <label style={styles.label}>시간당 가격 (원)</label>
+                    <input
+                      type="number"
+                      style={styles.input}
+                      placeholder="예: 20000"
+                      value={newFacility.hourPrice}
+                      onChange={(e) =>
+                        handleChange("hourPrice", e.target.value)
+                      }
+                    />
+                  </div>
+                  <div style={styles.formGroup}>
+                    <label style={styles.label}>1박 가격 (원)</label>
+                    <input
+                      type="number"
+                      style={styles.input}
+                      placeholder="예: 80000"
+                      value={newFacility.nightPrice}
+                      onChange={(e) =>
+                        handleChange("nightPrice", e.target.value)
+                      }
+                    />
+                  </div>
                 </div>
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>1박 가격 (원)</label>
-                  <input
-                    type="number"
-                    style={styles.input}
-                    placeholder="예: 80000"
-                    value={newFacility.nightPrice}
-                    onChange={(e) => handleChange("nightPrice", e.target.value)}
-                  />
+
+                <div style={styles.formRow}>
+                  <div style={styles.formGroup}>
+                    <label style={styles.label}>⏰ 체크인 시간</label>
+                    <input
+                      type="time"
+                      style={styles.input}
+                      value={newFacility.openTime}
+                      onChange={(e) => handleChange("openTime", e.target.value)}
+                    />
+                  </div>
+                  <div style={styles.formGroup}>
+                    <label style={styles.label}>⏰ 체크아웃 시간</label>
+                    <input
+                      type="time"
+                      style={styles.input}
+                      value={newFacility.closeTime}
+                      onChange={(e) =>
+                        handleChange("closeTime", e.target.value)
+                      }
+                    />
+                  </div>
                 </div>
-              </div>
+              </>
             )}
 
             {newFacility.type === "RESTAURANT" && (
-              <div style={styles.formGroup}>
-                <label style={styles.label}>음식 종류</label>
-                <select
-                  style={styles.input}
-                  value={newFacility.foodType}
-                  onChange={(e) => handleChange("foodType", e.target.value)}
-                >
-                  <option value="KOREAN_FOOD">🇰🇷 한식</option>
-                  <option value="JAPANESE_FOOD">🇯🇵 일식</option>
-                  <option value="CHINESE_FOOD">🇨🇳 중식</option>
-                  <option value="VIETNAMESE_FOOD">🇻🇳 베트남 음식</option>
-                  <option value="OTHER">🍴 기타</option>
-                </select>
-              </div>
+              <>
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>음식 종류</label>
+                  <select
+                    style={styles.input}
+                    value={newFacility.foodType}
+                    onChange={(e) => handleChange("foodType", e.target.value)}
+                  >
+                    <option value="KOREAN_FOOD">🇰🇷 한식</option>
+                    <option value="JAPANESE_FOOD">🇯🇵 일식</option>
+                    <option value="CHINESE_FOOD">🇨🇳 중식</option>
+                    <option value="VIETNAMESE_FOOD">🇻🇳 베트남 음식</option>
+                    <option value="OTHER">🍴 기타</option>
+                  </select>
+                </div>
+
+                {/* ← THÊM MỚI */}
+                <div style={styles.formRow}>
+                  <div style={styles.formGroup}>
+                    <label style={styles.label}>⏰ 영업 시작 시간</label>
+                    <input
+                      type="time"
+                      style={styles.input}
+                      value={newFacility.openTime}
+                      onChange={(e) => handleChange("openTime", e.target.value)}
+                    />
+                  </div>
+                  <div style={styles.formGroup}>
+                    <label style={styles.label}>⏰ 영업 종료 시간</label>
+                    <input
+                      type="time"
+                      style={styles.input}
+                      value={newFacility.closeTime}
+                      onChange={(e) =>
+                        handleChange("closeTime", e.target.value)
+                      }
+                    />
+                  </div>
+                </div>
+              </>
             )}
           </section>
 

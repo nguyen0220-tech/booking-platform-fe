@@ -1,6 +1,10 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { fetchFacilitiesApi, searchFacilitiesApi } from "../api/facilityApi";
+import {
+  fetchFacilitiesApi,
+  searchFacilitiesApi,
+  cancelFacilityApi,
+} from "../api/facilityApi";
 
 function FacilityPage() {
   const [user, setUser] = useState(null);
@@ -13,7 +17,7 @@ function FacilityPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [keyword, setKeyword] = useState("");
-  const [activeKeyword, setActiveKeyword] = useState(""); // keyword đang được áp dụng
+  const [activeKeyword, setActiveKeyword] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -64,6 +68,18 @@ function FacilityPage() {
     loadFacilities(0, "");
   };
 
+  const handleCancel = async (e, facilityId) => {
+    e.stopPropagation();
+    if (!window.confirm("정말로 이 등록 요청을 취소하시겠습니까?")) return;
+    try {
+      await cancelFacilityApi(facilityId);
+      alert("등록 요청이 취소되었습니다.");
+      loadFacilities(pageInfo.page, activeKeyword);
+    } catch (err) {
+      alert("취소 처리 중 오류가 발생했습니다.");
+    }
+  };
+
   const getTypeLabel = (type) => {
     const map = {
       Sport: "⚽ 스포츠",
@@ -78,6 +94,7 @@ function FacilityPage() {
       APPROVED: { label: "승인됨", color: "#2ecc71" },
       PENDING: { label: "대기중", color: "#f39c12" },
       REJECTED: { label: "거절됨", color: "#e74c3c" },
+      CANCELLED: { label: "취소됨", color: "#95a5a6" },
     };
     const s = map[status] || { label: status, color: "#95a5a6" };
     return (
@@ -145,7 +162,6 @@ function FacilityPage() {
           </div>
         </div>
 
-        {/* Hiển thị đang tìm kiếm theo từ khóa nào */}
         {activeKeyword && (
           <p style={styles.searchHint}>
             🔎 <strong>"{activeKeyword}"</strong> 검색 결과
@@ -209,8 +225,19 @@ function FacilityPage() {
                           </td>
                           <td style={styles.td}>{info.name || "-"}</td>
                           <td style={styles.td}>{info.address || "-"}</td>
+                          {/* ✅ Badge + nút hủy cùng 1 ô */}
                           <td style={styles.td}>
-                            {getStatusBadge(approval.status)}
+                            <div style={styles.statusCell}>
+                              {getStatusBadge(approval.status)}
+                              {approval.status === "접수중입니다" && (
+                                <button
+                                  style={styles.cancelBtn}
+                                  onClick={(e) => handleCancel(e, facility.id)}
+                                >
+                                  🚫 취소
+                                </button>
+                              )}
+                            </div>
                           </td>
                           <td style={styles.td}>{approval.note || "-"}</td>
                           <td style={styles.td}>
@@ -385,6 +412,24 @@ const styles = {
     color: "#fff",
     fontSize: "12px",
     fontWeight: "600",
+  },
+  // ✅ Wrapper cho badge + nút hủy
+  statusCell: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "8px",
+  },
+  cancelBtn: {
+    padding: "4px 10px",
+    borderRadius: "5px",
+    border: "1px solid #e74c3c",
+    backgroundColor: "#fff",
+    color: "#e74c3c",
+    cursor: "pointer",
+    fontSize: "12px",
+    fontWeight: "600",
+    whiteSpace: "nowrap",
   },
   pagination: {
     display: "flex",

@@ -6,6 +6,7 @@ const STATUS_TABS = [
   { key: "PENDING", label: "⏳ 대기중" },
   { key: "APPROVED", label: "✅ 승인됨" },
   { key: "REJECTED", label: "❌ 거절됨" },
+  { key: "CANCELLED", label: "🚫 취소됨" },
 ];
 
 function RegistrationRequestPage() {

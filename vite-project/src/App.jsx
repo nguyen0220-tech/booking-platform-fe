@@ -12,6 +12,7 @@ import FacilityRegistryPage from "./pages/FacilityRegistryPage";
 import FacilityDetailsPage from "./pages/FacilityDetailsPage";
 import RegistrationRequestPage from "./pages/RegistrationRequestPage";
 import RegistrationRequestDetailsPage from "./pages/RegistrationRequestDetailsPage";
+import RestaurantMenuPage from "./pages/RestaurantMenuPage";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/profile/verify" element={<ProfileVerifyPage />} />
       <Route path="/facilities" element={<FacilityPage />} />
+      <Route path="/facilities/:id/menus" element={<RestaurantMenuPage />} />
       <Route path="/facility-registry" element={<FacilityRegistryPage />} />
       <Route path="/facility-details/:id" element={<FacilityDetailsPage />} />
       <Route
