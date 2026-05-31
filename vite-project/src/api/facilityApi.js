@@ -2,6 +2,7 @@ import {
   GET_FACILITIES,
   GET_FACILITIES_BY_KEYWORD,
   GET_FACILITY_DETAIL,
+  GET_FACILITY_PRICING,
   GET_RESTAURANT_MENUS,
   GET_FACILITY_REGISTRATION_LIST,
   GET_FACILITY_REGISTRATION_DETAIL,
@@ -34,6 +35,34 @@ export const fetchFacilityDetailApi = async (id) => {
     return result.data.facility;
   } catch (error) {
     console.error("Lỗi fetchFacilityDetailApi:", error);
+    throw error;
+  }
+};
+
+export const fetchFacilityPricingApi = async (facilityId) => {
+  try {
+    const response = await fetch(import.meta.env.VITE_API_URL + "/graphql", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getCsrfHeaders(),
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        query: GET_FACILITY_PRICING,
+        variables: { id: facilityId },
+      }),
+    });
+
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const result = await response.json();
+    if (result.errors) throw new Error(result.errors[0].message);
+
+    const target = result.data?.facility?.facilityTarget;
+    if (!target) return null;
+    return target; // trả nguyên object kèm __typename
+  } catch (error) {
+    console.error("Lỗi fetchFacilityPricingApi:", error);
     throw error;
   }
 };

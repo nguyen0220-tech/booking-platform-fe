@@ -707,27 +707,43 @@ function FacilityDetailsPage() {
     switch (target.__typename) {
       case "Sport":
         return (
-          <div style={styles.infoGrid}>
-            <InfoItem label="유형" value="⚽ 스포츠" />
-            <InfoItem
-              label="시간당 가격"
-              value={`${target.hourPrice?.toLocaleString()}원`}
-            />
-          </div>
+          <>
+            <div style={styles.infoGrid}>
+              <InfoItem label="유형" value="⚽ 스포츠" />
+              <InfoItem
+                label="시간당 가격"
+                value={`${target.hourPrice?.toLocaleString()}원`}
+              />
+            </div>
+            <button
+              style={styles.btnMenu}
+              onClick={() => navigate(`/facilities/${id}/package-sport`)}
+            >
+              📦 패키지 관리
+            </button>
+          </>
         );
       case "Motel":
         return (
-          <div style={styles.infoGrid}>
-            <InfoItem label="유형" value="🏨 모텔" />
-            <InfoItem
-              label="시간당 가격"
-              value={`${target.hourPrice?.toLocaleString()}원`}
-            />
-            <InfoItem
-              label="1박 가격"
-              value={`${target.nightPrice?.toLocaleString()}원`}
-            />
-          </div>
+          <>
+            <div style={styles.infoGrid}>
+              <InfoItem label="유형" value="🏨 모텔" />
+              <InfoItem
+                label="시간당 가격"
+                value={`${target.hourPrice?.toLocaleString()}원`}
+              />
+              <InfoItem
+                label="1박 가격"
+                value={`${target.nightPrice?.toLocaleString()}원`}
+              />
+            </div>
+            <button
+              style={styles.btnMenu}
+              onClick={() => navigate(`/facilities/${id}/package-motel`)}
+            >
+              📦 패키지 관리
+            </button>
+          </>
         );
       case "Restaurant":
         return (
@@ -738,28 +754,21 @@ function FacilityDetailsPage() {
               <InfoItem label="⏰ 영업 시작" value={target.openTime || "-"} />
               <InfoItem label="⏰ 영업 종료" value={target.closeTime || "-"} />
             </div>
-            {/* ← THÊM NÚT */}
-            <button
-              style={styles.btnMenu}
-              onClick={() => navigate(`/facilities/${id}/menus`)}
-            >
-              🍴 메뉴 관리
-            </button>
+            <div style={styles.btnRow}>
+              <button
+                style={styles.btnMenu}
+                onClick={() => navigate(`/facilities/${id}/menus`)}
+              >
+                🍴 메뉴 관리
+              </button>
+              <button
+                style={styles.btnMenu}
+                onClick={() => navigate(`/facilities/${id}/package-restaurant`)}
+              >
+                📦 패키지 관리
+              </button>
+            </div>
           </>
-        );
-        return (
-          <div style={styles.infoGrid}>
-            <InfoItem label="유형" value="🍽️ 음식점" />
-            <InfoItem label="음식 종류" value={target.foodType} />
-            <InfoItem
-              label="⏰ 영업 시작"
-              value={target.openTime || "-"}
-            />{" "}
-            <InfoItem
-              label="⏰ 영업 종료"
-              value={target.closeTime || "-"}
-            />{" "}
-          </div>
         );
       default:
         return null;

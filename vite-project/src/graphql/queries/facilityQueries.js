@@ -96,6 +96,31 @@ export const GET_FACILITY_DETAIL = `
   }
 `;
 
+export const GET_FACILITY_PRICING = `
+  query GetFacilityPricing($id: ID!) {
+    facility(id: $id) {
+      facilityTarget {
+        __typename
+        ... on Sport {
+          hourPrice
+        }
+        ... on Motel {
+          hourPrice
+          nightPrice
+        }
+        ... on Restaurant {
+          menus {
+            id
+            name
+            price
+            imageUrl
+          }
+        }
+      }
+    }
+  }
+`;
+
 export const GET_RESTAURANT_MENUS = `
   query GetRestaurantMenus($id: ID!) {
     facility(id: $id) {

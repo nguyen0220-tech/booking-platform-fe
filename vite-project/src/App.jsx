@@ -13,6 +13,7 @@ import FacilityDetailsPage from "./pages/FacilityDetailsPage";
 import RegistrationRequestPage from "./pages/RegistrationRequestPage";
 import RegistrationRequestDetailsPage from "./pages/RegistrationRequestDetailsPage";
 import RestaurantMenuPage from "./pages/RestaurantMenuPage";
+import FacilityPackagePage from "./pages/FacilityPackagePage";
 
 function App() {
   return (
@@ -36,6 +37,19 @@ function App() {
       <Route
         path="/registration-requests/details/:id"
         element={<RegistrationRequestDetailsPage />}
+      />
+
+      <Route
+        path="/facilities/:id/package-sport"
+        element={<FacilityPackagePage />}
+      />
+      <Route
+        path="/facilities/:id/package-motel"
+        element={<FacilityPackagePage />}
+      />
+      <Route
+        path="/facilities/:id/package-restaurant"
+        element={<FacilityPackagePage />}
       />
     </Routes>
   );
