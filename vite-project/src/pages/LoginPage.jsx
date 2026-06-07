@@ -95,7 +95,16 @@ function LoginPage() {
       } else {
         const res = await loginApi(form.username, form.password);
         localStorage.setItem("user", JSON.stringify(res.data));
-        navigate("/home");
+
+        const roles = res.data?.roles?.map((r) => r.name) ?? [];
+
+        if (roles.includes("ROLE_ADMIN")) {
+          navigate("/admin");
+        } else if (roles.includes("ROLE_PROVIDER")) {
+          navigate("/provider");
+        } else {
+          navigate("/home"); // ROLE_USER hoặc mặc định
+        }
       }
     } catch (err) {
       if (err.details) {

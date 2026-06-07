@@ -321,7 +321,7 @@ function RestaurantFields({
         />
       </Field>
 
-      <Field label="포함 메뉴" required>
+      <Field label="포함 메뉴 (에피타이저)" required>
         {menusLoading ? (
           <div style={s.menuState}>
             <div style={s.menuStateSpinner} />
@@ -474,8 +474,6 @@ export default function AddPackageModal({
     if (facilityType === "RESTAURANT") {
       if (!extra.capacity || Number(extra.capacity) < 1)
         return "최대 인원은 1명 이상이어야 합니다.";
-      if (!extra.menuIds || extra.menuIds.length === 0)
-        return "메뉴를 1개 이상 선택해주세요.";
     }
     return null;
   };

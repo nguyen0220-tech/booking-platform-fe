@@ -2,27 +2,25 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { logoutApi } from "../api/authApi";
 
-function HomePage() {
+function HomeForAdmin() {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Lấy dữ liệu user từ localStorage
     const savedUser = localStorage.getItem("user");
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      const parsed = JSON.parse(savedUser);
+      const isAdmin = parsed?.roles?.some((r) => r.name === "ROLE_ADMIN");
+      if (!isAdmin) {
+        navigate("/");
+      } else {
+        setUser(parsed);
+      }
     } else {
-      // Nếu chưa đăng nhập thì đẩy về trang login
       navigate("/");
     }
   }, [navigate]);
 
-  // Kiểm tra quyền Admin và Provider
-  const isAdmin = user?.roles?.some((role) => role.name === "ROLE_ADMIN");
-  const isProvider = user?.roles?.some((role) => role.name === "ROLE_PROVIDER");
-  const isUser = user?.roles?.some((role) => role.name === "ROLE_USER");
-
-  // Cập nhật hàm handleLogout
   const handleLogout = async () => {
     try {
       await logoutApi();
@@ -43,52 +41,24 @@ function HomePage() {
         <div style={styles.navBrand}>🏠 CUK Booking</div>
 
         <div style={styles.navLinks}>
-          {/* Nút hiển thị cho tất cả mọi người */}
           <button style={styles.navButton} onClick={() => navigate("/profile")}>
             <span style={styles.icon}>👤</span> 내 페이지
           </button>
 
-          {/* Nút chỉ dành cho Provider */}
-          {isUser && !isAdmin && (
-            <button
-              style={styles.navButton}
-              onClick={() => console.log("Reservations")}
-            >
-              <span style={styles.icon}>📅</span> 예약 내역
-            </button>
-          )}
+          <button
+            style={{ ...styles.navButton, ...styles.adminNavButton }}
+            onClick={() => navigate("/users")}
+          >
+            <span style={styles.icon}>🛡️</span> 사용자 관리
+          </button>
 
-          {/* Nút chỉ dành cho Provider */}
-          {isProvider && (
-            <button
-              style={styles.navButton}
-              onClick={() => navigate("/facilities")}
-            >
-              <span style={styles.icon}>📦</span> 제품 관리
-            </button>
-          )}
+          <button
+            style={{ ...styles.navButton, ...styles.adminNavButton }}
+            onClick={() => navigate("/registration-requests")}
+          >
+            <span style={styles.icon}>📋</span> 등록요청관리
+          </button>
 
-          {/* Nút chỉ dành cho Admin */}
-          {isAdmin && (
-            <>
-              <button
-                style={{ ...styles.navButton, ...styles.adminNavButton }}
-                onClick={() => navigate("/users")}
-              >
-                <span style={styles.icon}>🛡️</span> 사용자 관리
-              </button>
-
-              {/* Nút mới: Quản lý yêu cầu đăng ký */}
-              <button
-                style={{ ...styles.navButton, ...styles.adminNavButton }}
-                onClick={() => navigate("/registration-requests")}
-              >
-                <span style={styles.icon}>📋</span> 등록요청관리
-              </button>
-            </>
-          )}
-
-          {/* Thông tin user & Logout */}
           <div style={styles.userInfo}>
             <span style={styles.userName}>Hello, {user.fullName}!</span>
             <button style={styles.logoutButton} onClick={handleLogout}>
@@ -101,10 +71,10 @@ function HomePage() {
       {/* CONTENT AREA */}
       <main style={styles.mainContent}>
         <div style={styles.placeholderCard}>
-          <h2>Chào mừng quay trở lại, {user.fullName}! 👋</h2>
+          <h2>Chào mừng quay trở lại, {user.fullName}! 🛡️</h2>
           <p>
-            Đây là khu vực nội dung chính. Bạn có thể thêm các dashboard, biểu
-            đồ, hoặc thông báo tại đây trong tương lai.
+            Bạn đang đăng nhập với quyền <strong>Admin</strong>. Sử dụng các
+            menu phía trên để quản lý người dùng và yêu cầu đăng ký.
           </p>
         </div>
       </main>
@@ -120,8 +90,6 @@ const styles = {
     backgroundColor: "#f5f6fa",
     fontFamily: "Arial, sans-serif",
   },
-
-  // -- STYLES CHO NAVBAR --
   navbar: {
     display: "flex",
     justifyContent: "space-between",
@@ -155,7 +123,6 @@ const styles = {
     alignItems: "center",
     backgroundColor: "transparent",
     color: "#34495e",
-    transition: "background 0.2s",
   },
   icon: {
     marginRight: "6px",
@@ -187,10 +154,7 @@ const styles = {
     backgroundColor: "#fff",
     color: "#e74c3c",
     cursor: "pointer",
-    transition: "all 0.2s",
   },
-
-  // -- STYLES CHO CONTENT AREA --
   mainContent: {
     flex: 1,
     padding: "30px",
@@ -210,4 +174,4 @@ const styles = {
   },
 };
 
-export default HomePage;
+export default HomeForAdmin;

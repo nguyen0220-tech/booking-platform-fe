@@ -4,7 +4,9 @@ import ForgotAccountPage from "./pages/ForgotAccountPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import RegistryResponsePage from "./pages/RegistryResponsePage";
 import UserPage from "./pages/UserPage";
-import HomePage from "./pages/HomePage";
+import HomeForAdmin from "./pages/HomeForAdmin";
+import HomeForProvider from "./pages/HomeForProvider";
+import HomeForUser from "./pages/HomeForUser";
 import ProfilePage from "./pages/ProfilePage";
 import ProfileVerifyPage from "./pages/ProfileVerifyPage";
 import FacilityPage from "./pages/FacilityPage";
@@ -14,6 +16,8 @@ import RegistrationRequestPage from "./pages/RegistrationRequestPage";
 import RegistrationRequestDetailsPage from "./pages/RegistrationRequestDetailsPage";
 import RestaurantMenuPage from "./pages/RestaurantMenuPage";
 import FacilityPackagePage from "./pages/FacilityPackagePage";
+import FacilitySearchPage from "./pages/FacilitySearchPage";
+import PackagePublicViewPage from "./pages/PackagePublicViewPage";
 
 function App() {
   return (
@@ -23,7 +27,9 @@ function App() {
       <Route path="/forgot-password" element={<ResetPasswordPage />} />
       <Route path="/verify" element={<RegistryResponsePage />} />
       <Route path="/users" element={<UserPage />} />
-      <Route path="/home" element={<HomePage />} />
+      <Route path="/admin" element={<HomeForAdmin />} />
+      <Route path="/provider" element={<HomeForProvider />} />
+      <Route path="/home" element={<HomeForUser />} />
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/profile/verify" element={<ProfileVerifyPage />} />
       <Route path="/facilities" element={<FacilityPage />} />
@@ -38,7 +44,6 @@ function App() {
         path="/registration-requests/details/:id"
         element={<RegistrationRequestDetailsPage />}
       />
-
       <Route
         path="/facilities/:id/package-sport"
         element={<FacilityPackagePage />}
@@ -51,6 +56,8 @@ function App() {
         path="/facilities/:id/package-restaurant"
         element={<FacilityPackagePage />}
       />
+      <Route path="/search" element={<FacilitySearchPage />} />
+      <Route path="/facilities/:id" element={<PackagePublicViewPage />} />
     </Routes>
   );
 }

@@ -247,3 +247,75 @@ export const GET_FACILITY_REGISTRATION_DETAIL = `
     }
   }
 `;
+
+//USER
+export const SEARCH_FACILITIES_WITH_KEYWORD = `
+  query($keyword: String!, $page: Int!, $size: Int!) {
+    facilitiesWithKeyword(keyword: $keyword, page: $page, size: $size) {
+      data {
+        id
+        facilityType
+        imageUrls
+        facilityInfo { name address }
+      }
+      pageInfo { page size hasNext totalElements totalPages }
+    }
+  }
+`;
+
+// Thêm vào facilityQueries.js
+
+export const GET_FACILITY_PUBLIC_DETAIL = `
+  query GetFacilityPublicDetail($id: ID!, $page: Int!, $size: Int!) {
+    facility(id: $id) {
+      id
+      facilityType
+      facilityInfo {
+        name
+        description
+        address
+        instruction
+        carPark
+        hasWifi
+      }
+      imageUrls
+      packages(page: $page, size: $size) {
+        data {
+          id
+          infoDetails {
+            packageName
+            note
+            totalCount
+            price
+            salePrice
+          }
+          packageTarget {
+            ... on SportPackage {
+              startTime
+              endTime
+            }
+            ... on MotelPackage {
+              pricingType
+              checkIn
+              checkOut
+            }
+            ... on RestaurantPackage {
+              maxCapacity
+              menus {
+                name
+                description
+                price
+                imageUrl
+              }
+            }
+          }
+        }
+        pageInfo {
+          page
+          size
+          hasNext
+        }
+      }
+    }
+  }
+`;
