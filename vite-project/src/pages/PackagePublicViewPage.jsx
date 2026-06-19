@@ -240,7 +240,7 @@ function PackagePublicViewPage() {
           onClose={() => setBookingPkg(null)}
           onSuccess={() => {
             setBookingPkg(null);
-            alert("예약이 완료되었습니다! ✅");
+            alert("예약이 완료되었습니다!");
           }}
         />
       )}
@@ -347,6 +347,16 @@ function PackageTargetDetail({ target, count }) {
             <p style={pkgStyles.menuTitle}>🍽️ 메뉴(에피타이저)</p>
             {target.menus.map((menu, i) => (
               <div key={i} style={pkgStyles.menuItem}>
+                {menu.imageUrl && (
+                  <img
+                    src={menu.imageUrl}
+                    alt={menu.name}
+                    style={pkgStyles.menuImg}
+                    onError={(e) => {
+                      e.target.style.display = "none";
+                    }}
+                  />
+                )}
                 <div style={pkgStyles.menuInfo}>
                   <span style={pkgStyles.menuName}>{menu.name}</span>
                   {menu.description && (
@@ -701,6 +711,7 @@ const pkgStyles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
+    gap: "10px",
     padding: "8px 10px",
     backgroundColor: "#fff",
     borderRadius: "6px",
@@ -726,6 +737,13 @@ const pkgStyles = {
     cursor: "pointer",
     alignSelf: "flex-end",
     minWidth: "160px",
+  },
+  menuImg: {
+    width: "52px",
+    height: "52px",
+    objectFit: "cover",
+    borderRadius: "6px",
+    flexShrink: 0,
   },
 };
 

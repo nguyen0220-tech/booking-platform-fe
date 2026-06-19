@@ -263,8 +263,6 @@ export const SEARCH_FACILITIES_WITH_KEYWORD = `
   }
 `;
 
-// Thêm vào facilityQueries.js
-
 export const GET_FACILITY_PUBLIC_DETAIL = `
   query GetFacilityPublicDetail($id: ID!, $page: Int!, $size: Int!) {
     facility(id: $id) {
@@ -315,6 +313,22 @@ export const GET_FACILITY_PUBLIC_DETAIL = `
           size
           hasNext
         }
+      }
+    }
+  }
+`;
+
+export const GET_FACILITIES_SUGGESTION = `
+  query GetFacilitiesSuggestion {
+    facilitiesSuggestion {
+      data {
+        id
+        facilityType
+        facilityInfo {
+          name
+          address
+        }
+        imageUrls
       }
     }
   }

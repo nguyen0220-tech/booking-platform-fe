@@ -11,14 +11,14 @@ const GET_BOOKED_DATES = `
 `;
 
 const PAY_METHODS = [
-  { value: "KAKAO_PAY", label: "카카오페이", emoji: "💛" },
-  { value: "NAVER_PAY", label: "네이버페이", emoji: "💚" },
-  { value: "APPLE_PAY", label: "애플페이", emoji: "🍎" },
+  { value: "KAKAO_PAY", label: "카카오페이", emoji: "💛", discount: 10 },
+  { value: "NAVER_PAY", label: "네이버페이", emoji: "💚", discount: 5 },
+  { value: "APPLE_PAY", label: "애플페이", emoji: "🍎", discount: 20 },
 ];
 
 // ── Helper: tạo lịch tháng ───────────────────────────────────────────────────
 function buildCalendar(year, month) {
-  const firstDay = new Date(year, month, 1).getDay(); // 0=Sun
+  const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const cells = [];
   for (let i = 0; i < firstDay; i++) cells.push(null);
@@ -53,8 +53,16 @@ export default function BookingModal({
   const isRestaurant = facilityType === "RESTAURANT";
   const packageId = pkg?.id;
   const pkgName = pkg?.infoDetails?.packageName || "패키지";
-  const price = pkg?.infoDetails?.salePrice ?? pkg?.infoDetails?.price;
-  const startTimePkg = pkg?.packageTarget?.startTime; // SPORT 전용
+  const salePrice = pkg?.infoDetails?.salePrice;
+  const price =
+    salePrice != null && salePrice > 0 ? salePrice : pkg?.infoDetails?.price;
+  const startTimePkg = pkg?.packageTarget?.startTime;
+
+  // 선택된 결제 수단 & 최종 금액 계산
+  const selectedPayMethod = PAY_METHODS.find((p) => p.value === payMethod);
+  const discountRate = selectedPayMethod?.discount ?? 0;
+  const finalPrice =
+    price != null ? Math.round(price * (1 - discountRate / 100)) : null;
 
   // ── Fetch booked dates ──────────────────────────────────────────────────────
   const fetchBookedDates = useCallback(async () => {
@@ -235,7 +243,6 @@ export default function BookingModal({
                     const isBooked = bookedDates.includes(dateStr);
                     const isPast = dateStr < todayStr;
                     const isSelected = selectedDate === dateStr;
-                    // RESTAURANT: chỉ disable ngày quá khứ (cho phép chọn ngày đã có booking)
                     const disabled = isRestaurant ? isPast : isBooked || isPast;
                     const col = idx % 7;
 
@@ -246,7 +253,6 @@ export default function BookingModal({
                         style={{
                           ...s.calCell,
                           ...(isSelected ? s.calCellSelected : {}),
-                          // RESTAURANT: không tô đỏ ngày đã đặt
                           ...(!isRestaurant && isBooked ? s.calCellBooked : {}),
                           ...(isPast ? s.calCellPast : {}),
                           ...(!disabled && col === 0
@@ -259,7 +265,6 @@ export default function BookingModal({
                         onClick={() => !disabled && setSelectedDate(dateStr)}
                       >
                         {day}
-                        {/* RESTAURANT: không hiện dấu chấm đỏ */}
                         {!isRestaurant && isBooked && (
                           <span style={s.bookedDot} />
                         )}
@@ -315,26 +320,55 @@ export default function BookingModal({
             </div>
           )}
 
-          {/* ── 3. 결제 수단 ── */}
+          {/* ── 결제 수단 ── */}
           <div style={s.block}>
             <label style={s.label}>
               {isRestaurant ? "3." : "2."} 결제 수단{" "}
               <span style={s.required}>*</span>
             </label>
             <div style={s.payRow}>
-              {PAY_METHODS.map((pm) => (
-                <button
-                  key={pm.value}
-                  style={{
-                    ...s.payBtn,
-                    ...(payMethod === pm.value ? s.payBtnActive : {}),
-                  }}
-                  onClick={() => setPayMethod(pm.value)}
-                >
-                  <span style={s.payEmoji}>{pm.emoji}</span>
-                  {pm.label}
-                </button>
-              ))}
+              {PAY_METHODS.map((pm) => {
+                const isActive = payMethod === pm.value;
+                const discountedPrice =
+                  price != null
+                    ? Math.round(price * (1 - pm.discount / 100))
+                    : null;
+                return (
+                  <button
+                    key={pm.value}
+                    style={{
+                      ...s.payBtn,
+                      ...(isActive ? s.payBtnActive : {}),
+                    }}
+                    onClick={() => setPayMethod(pm.value)}
+                  >
+                    {/* 상단: 이모지 + 이름 + 할인 배지 */}
+                    <div style={s.payBtnTop}>
+                      <span style={s.payEmoji}>{pm.emoji}</span>
+                      <span style={s.payLabel}>{pm.label}</span>
+                      <span
+                        style={{
+                          ...s.discountBadge,
+                          ...(isActive ? s.discountBadgeActive : {}),
+                        }}
+                      >
+                        -{pm.discount}%
+                      </span>
+                    </div>
+                    {/* 하단: 할인 적용 금액 */}
+                    {discountedPrice != null && (
+                      <div
+                        style={{
+                          ...s.payBtnPrice,
+                          ...(isActive ? { color: "#2e7d32" } : {}),
+                        }}
+                      >
+                        {discountedPrice.toLocaleString()}원
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -365,15 +399,20 @@ export default function BookingModal({
             <div style={s.summaryRow}>
               <span style={s.summaryKey}>결제 수단</span>
               <span style={s.summaryVal}>
-                {PAY_METHODS.find((p) => p.value === payMethod)?.label || "—"}
+                {selectedPayMethod
+                  ? `${selectedPayMethod.emoji} ${selectedPayMethod.label}`
+                  : "—"}
               </span>
             </div>
+
+            {/* 결제 금액 */}
             <div
               style={{
                 ...s.summaryRow,
                 marginTop: "8px",
                 borderTop: "1px solid #eee",
                 paddingTop: "10px",
+                alignItems: "flex-end",
               }}
             >
               <span
@@ -385,16 +424,26 @@ export default function BookingModal({
               >
                 결제 금액
               </span>
-              <span
-                style={{
-                  ...s.summaryVal,
-                  fontSize: "18px",
-                  fontWeight: "bold",
-                  color: "#e74c3c",
-                }}
-              >
-                {price != null ? Number(price).toLocaleString() + "원" : "—"}
-              </span>
+              <div style={{ textAlign: "right" }}>
+                {/* 원가 취소선 (할인이 있을 때만) */}
+                {payMethod && discountRate > 0 && price != null && (
+                  <div style={s.originalPrice}>
+                    {Number(price).toLocaleString()}원
+                  </div>
+                )}
+                {/* 최종 금액 */}
+                <span style={s.finalPrice}>
+                  {finalPrice != null
+                    ? finalPrice.toLocaleString() + "원"
+                    : "—"}
+                </span>
+                {/* 할인 적용 안내 */}
+                {payMethod && discountRate > 0 && (
+                  <div style={s.discountApplied}>
+                    {selectedPayMethod?.emoji} {discountRate}% 할인 적용
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -599,27 +648,70 @@ const s = {
   },
 
   /* Pay methods */
-  payRow: { display: "flex", gap: "10px", flexWrap: "wrap" },
+  payRow: {
+    display: "flex",
+    gap: "8px",
+  },
   payBtn: {
     display: "flex",
-    alignItems: "center",
+    flexDirection: "column",
+    alignItems: "flex-start",
     gap: "6px",
-    padding: "10px 16px",
+    padding: "12px 14px",
     fontSize: "13px",
     fontWeight: "500",
-    borderRadius: "8px",
-    border: "1px solid #ddd",
-    backgroundColor: "#fff",
+    borderRadius: "10px",
+    border: "1.5px solid #e0e0e0",
+    backgroundColor: "#fafafa",
     cursor: "pointer",
     color: "#34495e",
+    flex: "1 1 0",
+    minWidth: 0,
+    transition: "all 0.15s ease",
   },
   payBtnActive: {
     border: "2px solid #4CAF50",
-    backgroundColor: "#e8f5e9",
+    backgroundColor: "#f0faf0",
     color: "#2e7d32",
     fontWeight: "bold",
+    boxShadow: "0 2px 10px rgba(76,175,80,0.18)",
   },
-  payEmoji: { fontSize: "16px" },
+  payBtnTop: {
+    display: "flex",
+    alignItems: "center",
+    gap: "5px",
+    width: "100%",
+  },
+  payLabel: {
+    flex: 1,
+    fontSize: "12px",
+    textAlign: "left",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+  },
+  payEmoji: { fontSize: "16px", flexShrink: 0 },
+  discountBadge: {
+    fontSize: "10px",
+    fontWeight: "bold",
+    backgroundColor: "#fff3cd",
+    color: "#856404",
+    border: "1px solid #ffc107",
+    borderRadius: "4px",
+    padding: "1px 5px",
+    whiteSpace: "nowrap",
+    flexShrink: 0,
+  },
+  discountBadgeActive: {
+    backgroundColor: "#d4edda",
+    color: "#155724",
+    border: "1px solid #4CAF50",
+  },
+  payBtnPrice: {
+    fontSize: "13px",
+    fontWeight: "bold",
+    color: "#2c3e50",
+  },
 
   /* Summary */
   summary: {
@@ -638,6 +730,24 @@ const s = {
   },
   summaryKey: { fontSize: "13px", color: "#7f8c8d" },
   summaryVal: { fontSize: "13px", color: "#2c3e50", fontWeight: "500" },
+  originalPrice: {
+    fontSize: "12px",
+    color: "#bbb",
+    textDecoration: "line-through",
+    textAlign: "right",
+    marginBottom: "2px",
+  },
+  finalPrice: {
+    fontSize: "18px",
+    fontWeight: "bold",
+    color: "#e74c3c",
+  },
+  discountApplied: {
+    fontSize: "11px",
+    color: "#4CAF50",
+    marginTop: "3px",
+    textAlign: "right",
+  },
 
   /* Error */
   errorBox: {

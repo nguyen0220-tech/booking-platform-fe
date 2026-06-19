@@ -546,7 +546,7 @@ export default function AddPackageModal({
         </Field>
 
         <Field
-          label="할인가 (원) - 원가는 세트에 있는 메뉴들의 가격으로 계산됩니다"
+          label="할인가 (원) - 1.원가는 시설이 제공한 가격으로 계산됩니다. 2.할인이 없을 경우 0으로 기재 "
           required
         >
           <input

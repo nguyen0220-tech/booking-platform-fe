@@ -18,6 +18,8 @@ import RestaurantMenuPage from "./pages/RestaurantMenuPage";
 import FacilityPackagePage from "./pages/FacilityPackagePage";
 import FacilitySearchPage from "./pages/FacilitySearchPage";
 import PackagePublicViewPage from "./pages/PackagePublicViewPage";
+import BookingPage from "./pages/BookingPage";
+import BookingDetailsPage from "./pages/BookingDetailsPage";
 
 function App() {
   return (
@@ -58,6 +60,8 @@ function App() {
       />
       <Route path="/search" element={<FacilitySearchPage />} />
       <Route path="/facilities/:id" element={<PackagePublicViewPage />} />
+      <Route path="/reservations" element={<BookingPage />} />
+      <Route path="/reservations/:bookingId" element={<BookingDetailsPage />} />
     </Routes>
   );
 }

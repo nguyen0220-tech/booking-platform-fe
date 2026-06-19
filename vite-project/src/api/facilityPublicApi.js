@@ -1,6 +1,7 @@
 import {
   SEARCH_FACILITIES_WITH_KEYWORD,
   GET_FACILITY_PUBLIC_DETAIL,
+  GET_FACILITIES_SUGGESTION,
 } from "../graphql/queries/facilityQueries";
 
 // ─── Query dành cho USER (public, không cần auth) ───────────────────────────
@@ -47,4 +48,20 @@ export const fetchFacilityPublicDetailApi = async ({
   const result = await response.json();
   if (result.errors) throw new Error(result.errors[0].message);
   return result.data.facility;
+};
+
+// ─── Facility suggestion (public) ────────────────────────────────────────────
+export const fetchFacilitiesSuggestionApi = async () => {
+  const response = await fetch(import.meta.env.VITE_API_URL + "/graphql", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({
+      query: GET_FACILITIES_SUGGESTION,
+    }),
+  });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  const result = await response.json();
+  if (result.errors) throw new Error(result.errors[0].message);
+  return result.data.facilitiesSuggestion;
 };
