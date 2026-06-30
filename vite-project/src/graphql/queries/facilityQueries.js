@@ -63,6 +63,8 @@ export const GET_FACILITY_DETAIL = `
         description
         address
         instruction
+        averageRating
+        totalReviews
         active
         carPark
         hasWifi
@@ -256,7 +258,7 @@ export const SEARCH_FACILITIES_WITH_KEYWORD = `
         id
         facilityType
         imageUrls
-        facilityInfo { name address }
+        facilityInfo { name address averageRating totalReviews}
       }
       pageInfo { page size hasNext totalElements totalPages }
     }
@@ -273,6 +275,8 @@ export const GET_FACILITY_PUBLIC_DETAIL = `
         description
         address
         instruction
+        averageRating
+        totalReviews
         carPark
         hasWifi
       }
@@ -313,6 +317,40 @@ export const GET_FACILITY_PUBLIC_DETAIL = `
           size
           hasNext
         }
+      }
+    }
+  }
+`;
+
+export const GET_FACILITIES_IN_POPULAR_DESTINATION = `
+  query GetFacilitiesInPopularDestination(
+    $destination: PopularDestination!
+    $page: Int!
+    $size: Int!
+  ) {
+    facilitiesInPopularDestination(
+      destination: $destination
+      page: $page
+      size: $size
+    ) {
+      data {
+        id
+        facilityType
+        facilityInfo {
+          name
+          address
+          description
+          averageRating
+          totalReviews
+        }
+        imageUrls
+      }
+      pageInfo {
+        page
+        size
+        hasNext
+        totalElements
+        totalPages
       }
     }
   }

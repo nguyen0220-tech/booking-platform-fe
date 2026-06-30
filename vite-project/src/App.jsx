@@ -20,6 +20,7 @@ import FacilitySearchPage from "./pages/FacilitySearchPage";
 import PackagePublicViewPage from "./pages/PackagePublicViewPage";
 import BookingPage from "./pages/BookingPage";
 import BookingDetailsPage from "./pages/BookingDetailsPage";
+import PopularDestinationFacilities from "./pages/PopularDestinationFacilities";
 
 function App() {
   return (
@@ -62,6 +63,10 @@ function App() {
       <Route path="/facilities/:id" element={<PackagePublicViewPage />} />
       <Route path="/reservations" element={<BookingPage />} />
       <Route path="/reservations/:bookingId" element={<BookingDetailsPage />} />
+      <Route
+        path="/destinations/:slug"
+        element={<PopularDestinationFacilities />}
+      />
     </Routes>
   );
 }

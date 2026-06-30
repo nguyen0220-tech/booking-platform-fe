@@ -36,7 +36,6 @@ function FacilitySearchPage() {
     }
   }, []);
 
-  // Chỉ fetch khi có keyword (từ URL ?q=... hoặc sau khi user bấm tìm)
   useEffect(() => {
     if (keyword.trim()) {
       fetchResults(keyword, page);
@@ -71,7 +70,7 @@ function FacilitySearchPage() {
         </div>
       </nav>
 
-      {/* SEARCH BAR */}
+      {/* SEARCH BAR WITH BACKGROUND IMAGE */}
       <div style={styles.searchWrap}>
         <form onSubmit={handleSearch} style={styles.searchForm}>
           <div style={styles.searchInner}>
@@ -223,6 +222,18 @@ function FacilityCard({ facility, onClick }) {
         <p style={styles.cardAddress}>
           📍 {facilityInfo?.address || "주소 없음"}
         </p>
+        {/* ── RATING ── */}
+        <div style={styles.cardRatingRow}>
+          <span style={styles.cardRatingStar}>★</span>
+          <span style={styles.cardRatingValue}>
+            {facilityInfo?.averageRating != null
+              ? Number(facilityInfo.averageRating).toFixed(1)
+              : "—"}
+          </span>
+          <span style={styles.cardReviewCount}>
+            ({facilityInfo?.totalReviews ?? 0}개 평가)
+          </span>
+        </div>
       </div>
     </div>
   );
@@ -248,33 +259,41 @@ const styles = {
   navBrand: {
     fontSize: "20px",
     fontWeight: "bold",
-    color: "#2c3e50",
+    color: "#4CAF50",
     cursor: "pointer",
     display: "inline-block",
   },
 
-  /* Search */
+  /* Search Area */
   searchWrap: {
-    backgroundColor: "#fff",
+    backgroundColor: "#333",
+    backgroundImage:
+      "linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('/booking.png')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
     borderBottom: "1px solid #eaeaea",
-    padding: "14px 24px",
+    padding: "120px 24px",
+    display: "flex",
+    justifyContent: "center",
   },
   searchForm: {
     display: "flex",
     gap: "10px",
     maxWidth: "700px",
+    width: "100%",
   },
   searchInner: {
     flex: 1,
     display: "flex",
     alignItems: "center",
     gap: "10px",
-    backgroundColor: "#f0f2f5",
+    backgroundColor: "#ffffff",
     border: "1px solid #ddd",
     borderRadius: "10px",
     padding: "10px 16px",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
   },
-  searchIcon: { fontSize: "16px", flexShrink: 0 },
+  searchIcon: { color: "#999", fontSize: "16px", flexShrink: 0 },
   searchInput: {
     flex: 1,
     border: "none",
@@ -292,7 +311,7 @@ const styles = {
     padding: "2px 4px",
   },
   searchBtn: {
-    padding: "10px 20px",
+    padding: "10px 24px",
     fontSize: "14px",
     fontWeight: "bold",
     borderRadius: "10px",
@@ -301,6 +320,7 @@ const styles = {
     color: "#fff",
     cursor: "pointer",
     whiteSpace: "nowrap",
+    boxShadow: "0 2px 8px rgba(76,175,80,0.3)",
   },
 
   /* Main */
@@ -355,14 +375,17 @@ const styles = {
     border: "1px solid #eaeaea",
     overflow: "hidden",
     cursor: "pointer",
-    transition: "box-shadow 0.2s",
+    transition: "box-shadow 0.2s, transform 0.2s",
     boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
+    display: "flex",
+    flexDirection: "column",
   },
   cardImgWrap: {
     position: "relative",
     height: "140px",
     backgroundColor: "#f0f2f5",
     overflow: "hidden",
+    flexShrink: 0,
   },
   cardImg: {
     width: "100%",
@@ -377,6 +400,7 @@ const styles = {
     justifyContent: "center",
     fontSize: "40px",
     backgroundColor: "#eef0f3",
+    color: "#bbb",
   },
   typeBadge: {
     position: "absolute",
@@ -393,6 +417,7 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     gap: "5px",
+    flex: 1,
   },
   cardName: {
     fontSize: "14px",
@@ -410,6 +435,27 @@ const styles = {
     whiteSpace: "nowrap",
     overflow: "hidden",
     textOverflow: "ellipsis",
+  },
+  cardRatingRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: "4px",
+    borderTop: "1px solid #f0f0f0",
+    paddingTop: "8px",
+    marginTop: "4px",
+  },
+  cardRatingStar: {
+    fontSize: "12px",
+    color: "#f5a623",
+  },
+  cardRatingValue: {
+    fontSize: "12px",
+    fontWeight: "700",
+    color: "#2c3e50",
+  },
+  cardReviewCount: {
+    fontSize: "11px",
+    color: "#aaa",
   },
 
   /* Pagination */
@@ -429,6 +475,7 @@ const styles = {
     backgroundColor: "#fff",
     cursor: "pointer",
     color: "#34495e",
+    transition: "background-color 0.2s",
   },
   pageBtnActive: {
     backgroundColor: "#4CAF50",

@@ -18,7 +18,6 @@ function PackagePublicViewPage() {
   const [error, setError] = useState("");
   const [bookingPkg, setBookingPkg] = useState(null);
 
-  // ── Fetch ───────────────────────────────────────────────────────────────────
   const fetchDetail = useCallback(
     async (page) => {
       setLoading(true);
@@ -45,7 +44,6 @@ function PackagePublicViewPage() {
     fetchDetail(pkgPage);
   }, [fetchDetail, pkgPage]);
 
-  // ── Loading / Error ─────────────────────────────────────────────────────────
   if (loading) {
     return (
       <div style={styles.centerBox}>
@@ -86,7 +84,7 @@ function PackagePublicViewPage() {
       </nav>
 
       <main style={styles.main}>
-        {/* ── HERO: IMAGE GALLERY + INFO ── */}
+        {/* ── HERO ── */}
         <div style={styles.heroSection}>
           {/* Image Gallery */}
           <div style={styles.gallery}>
@@ -130,6 +128,20 @@ function PackagePublicViewPage() {
             <span style={styles.typeBadge}>{facilityType || "기타"}</span>
             <h1 style={styles.facilityName}>{facilityInfo?.name}</h1>
             <p style={styles.address}>📍 {facilityInfo?.address}</p>
+
+            {/* ── RATING ── */}
+            <div style={styles.ratingRow}>
+              <span style={styles.ratingStar}>★</span>
+              <span style={styles.ratingValue}>
+                {facilityInfo?.averageRating != null
+                  ? Number(facilityInfo.averageRating).toFixed(1)
+                  : "—"}
+              </span>
+              <span style={styles.ratingDivider}>·</span>
+              <span style={styles.ratingCount}>
+                리뷰 {facilityInfo?.totalReviews ?? 0}개
+              </span>
+            </div>
 
             <div style={styles.amenities}>
               {facilityInfo?.hasWifi && (
@@ -176,7 +188,6 @@ function PackagePublicViewPage() {
             </div>
           )}
 
-          {/* Package pagination */}
           {pageInfo && (pkgPage > 0 || pageInfo.hasNext) && (
             <div style={styles.pkgPagination}>
               <button
@@ -204,15 +215,36 @@ function PackagePublicViewPage() {
           )}
         </section>
 
-        {/* ── REVIEWS (placeholder) ── */}
+        {/* ── REVIEWS ── */}
         <section style={styles.section}>
           <h2 style={styles.sectionTitle}>⭐ 리뷰</h2>
 
           <div style={styles.reviewSummary}>
             <div style={styles.reviewScore}>
-              <span style={styles.reviewScoreNum}>—</span>
-              <div style={styles.reviewStars}>★★★★★</div>
-              <span style={styles.reviewCount}>0 리뷰</span>
+              <span style={styles.reviewScoreNum}>
+                {facilityInfo?.averageRating != null
+                  ? Number(facilityInfo.averageRating).toFixed(1)
+                  : "—"}
+              </span>
+              <div style={styles.reviewStarsRow}>
+                {[1, 2, 3, 4, 5].map((s) => {
+                  const rating = facilityInfo?.averageRating ?? 0;
+                  return (
+                    <span
+                      key={s}
+                      style={{
+                        ...styles.reviewStar,
+                        color: s <= Math.round(rating) ? "#EF9F27" : "#ddd",
+                      }}
+                    >
+                      ★
+                    </span>
+                  );
+                })}
+              </div>
+              <span style={styles.reviewCount}>
+                {facilityInfo?.totalReviews ?? 0}개 리뷰
+              </span>
             </div>
             <div style={styles.reviewBars}>
               {[5, 4, 3, 2, 1].map((star) => (
@@ -505,6 +537,32 @@ const styles = {
     margin: 0,
   },
   address: { fontSize: "13px", color: "#7f8c8d", margin: 0 },
+
+  /* ── RATING ── */
+  ratingRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+  },
+  ratingStar: {
+    fontSize: "18px",
+    color: "#f5a623",
+    lineHeight: 1,
+  },
+  ratingValue: {
+    fontSize: "16px",
+    fontWeight: "700",
+    color: "#2c3e50",
+  },
+  ratingDivider: {
+    fontSize: "14px",
+    color: "#ccc",
+  },
+  ratingCount: {
+    fontSize: "13px",
+    color: "#7f8c8d",
+  },
+
   amenities: { display: "flex", gap: "8px", flexWrap: "wrap" },
   amenityTag: {
     padding: "4px 10px",
@@ -592,7 +650,14 @@ const styles = {
     color: "#2c3e50",
     lineHeight: 1,
   },
-  reviewStars: { fontSize: "18px", color: "#ddd", letterSpacing: "2px" },
+  reviewStarsRow: {
+    display: "flex",
+    gap: "2px",
+  },
+  reviewStar: {
+    fontSize: "18px",
+    letterSpacing: "1px",
+  },
   reviewCount: { fontSize: "12px", color: "#aaa" },
   reviewBars: {
     flex: 1,

@@ -1,6 +1,7 @@
 import {
   SEARCH_FACILITIES_WITH_KEYWORD,
   GET_FACILITY_PUBLIC_DETAIL,
+  GET_FACILITIES_IN_POPULAR_DESTINATION,
   GET_FACILITIES_SUGGESTION,
 } from "../graphql/queries/facilityQueries";
 
@@ -48,6 +49,27 @@ export const fetchFacilityPublicDetailApi = async ({
   const result = await response.json();
   if (result.errors) throw new Error(result.errors[0].message);
   return result.data.facility;
+};
+
+// ─── Facility theo điểm đến phổ biến (public) ────────────────────────────────
+export const fetchFacilitiesInPopularDestinationApi = async ({
+  destination,
+  page = 0,
+  size = 10,
+}) => {
+  const response = await fetch(import.meta.env.VITE_API_URL + "/graphql", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({
+      query: GET_FACILITIES_IN_POPULAR_DESTINATION,
+      variables: { destination, page, size },
+    }),
+  });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  const result = await response.json();
+  if (result.errors) throw new Error(result.errors[0].message);
+  return result.data.facilitiesInPopularDestination;
 };
 
 // ─── Facility suggestion (public) ────────────────────────────────────────────

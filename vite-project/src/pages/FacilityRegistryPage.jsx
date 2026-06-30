@@ -168,15 +168,6 @@ function FacilityRegistryPage() {
               <label style={styles.checkboxLabel}>
                 <input
                   type="checkbox"
-                  checked={newFacility.active}
-                  onChange={(e) => handleChange("active", e.target.checked)}
-                  style={styles.checkbox}
-                />
-                <span>🟢 영업 가능</span>
-              </label>
-              <label style={styles.checkboxLabel}>
-                <input
-                  type="checkbox"
                   checked={newFacility.carPark}
                   onChange={(e) => handleChange("carPark", e.target.checked)}
                   style={styles.checkbox}

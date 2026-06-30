@@ -175,7 +175,7 @@ export default function BookingPage() {
             onClick={() => navigate("/home")}
             title="Về trang chủ"
           >
-            ← Trang chủ
+            ← Home
           </button>
           <h1 style={s.title}>📋 나의 예약 목록</h1>
         </div>

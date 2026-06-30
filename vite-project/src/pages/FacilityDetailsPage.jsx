@@ -12,7 +12,7 @@ function ImageUploadModal({ facilityId, onClose, onSave }) {
   const [files, setFiles] = useState([]);
   const [previews, setPreviews] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState("select"); // "select" | "uploading" | "saving"
+  const [step, setStep] = useState("select");
   const [error, setError] = useState(null);
 
   const handleFileChange = (e) => {
@@ -35,13 +35,10 @@ function ImageUploadModal({ facilityId, onClose, onSave }) {
     setLoading(true);
     setError(null);
     try {
-      // Step 1: upload
       setStep("uploading");
       const imageUrls = await uploadImagesApi(files);
-      // Step 2: add to DB
       setStep("saving");
       await addFacilityImagesApi(facilityId, imageUrls);
-
       onSave(imageUrls);
       onClose();
     } catch (err) {
@@ -69,7 +66,6 @@ function ImageUploadModal({ facilityId, onClose, onSave }) {
         </button>
         <h2 style={modalStyles.title}>🖼️ 시설 사진 추가</h2>
 
-        {/* ── Drop zone / file input ── */}
         <label style={imgModalStyles.dropZone}>
           <input
             type="file"
@@ -85,7 +81,6 @@ function ImageUploadModal({ facilityId, onClose, onSave }) {
           </span>
         </label>
 
-        {/* ── Preview grid ── */}
         {previews.length > 0 && (
           <div style={imgModalStyles.previewGrid}>
             {previews.map((src, idx) => (
@@ -107,7 +102,6 @@ function ImageUploadModal({ facilityId, onClose, onSave }) {
           </div>
         )}
 
-        {/* ── Step indicator ── */}
         {loading && (
           <div style={imgModalStyles.stepIndicator}>
             <span style={{ ...imgModalStyles.stepDot, background: "#667eea" }}>
@@ -170,7 +164,6 @@ function ImageUploadModal({ facilityId, onClose, onSave }) {
   );
 }
 
-// styles cho ImageUploadModal
 const imgModalStyles = {
   dropZone: {
     display: "flex",
@@ -252,7 +245,6 @@ const imgModalStyles = {
   stepText: { fontSize: "12px", color: "#5a6a85", fontWeight: "500" },
 };
 
-// ── Modal: Options (active, carPark, hasWifi) ──
 function OptionsModal({ facilityId, info, onClose, onSave }) {
   const [active, setActive] = useState(info.active ?? false);
   const [carPark, setCarPark] = useState(info.carPark ?? false);
@@ -328,7 +320,6 @@ function OptionsModal({ facilityId, info, onClose, onSave }) {
           ))}
         </div>
 
-        {/* ── Error message ── */}
         {error && (
           <p
             style={{
@@ -369,7 +360,6 @@ function OptionsModal({ facilityId, info, onClose, onSave }) {
   );
 }
 
-// ── Modal: Facility Info (name, address, description, instruction) ──
 const FOOD_TYPES = [
   { value: "KOREAN_FOOD", label: "한식" },
   { value: "JAPANESE_FOOD", label: "일식" },
@@ -463,7 +453,6 @@ function InfoModal({
           {titleByType[facilityType] ?? "📝 시설 정보 수정"}
         </h2>
 
-        {/* ── 공통 필드 ── */}
         <ModalField label="시설명">
           <input
             style={modalStyles.formInput}
@@ -497,7 +486,6 @@ function InfoModal({
           />
         </ModalField>
 
-        {/* ── SPORT ── */}
         {facilityType === "SPORT" && (
           <ModalField label="⚽ 시간당 가격 (원)">
             <input
@@ -511,7 +499,6 @@ function InfoModal({
           </ModalField>
         )}
 
-        {/* ── MOTEL ── */}
         {facilityType === "MOTEL" && (
           <>
             <ModalField label="🏨 시간당 가격 (원)">
@@ -537,7 +524,6 @@ function InfoModal({
           </>
         )}
 
-        {/* ── RESTAURANT ── */}
         {facilityType === "RESTAURANT" && (
           <>
             <ModalField label="🍴 음식 종류">
@@ -576,7 +562,6 @@ function InfoModal({
                 ))}
               </div>
             </ModalField>
-
             <div style={{ display: "flex", gap: "12px" }}>
               <ModalField label="⏰ 영업 시작 시간">
                 <input
@@ -597,6 +582,7 @@ function InfoModal({
             </div>
           </>
         )}
+
         {error && (
           <p
             style={{
@@ -648,18 +634,10 @@ function FacilityDetailsPage() {
   const [error, setError] = useState(null);
   const [selectedImg, setSelectedImg] = useState(0);
 
-  const [showImageModal, setShowImageModal] = useState(false); // ← thêm
-
-  const handleSaveImages = (newUrls) => {
-    setFacility((prev) => ({
-      ...prev,
-      imageUrls: [...(prev.imageUrls || []), ...newUrls],
-    }));
-  };
-
+  const [showImageModal, setShowImageModal] = useState(false);
   const [showOptionsModal, setShowOptionsModal] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
-  const [localInfo, setLocalInfo] = useState(null); // lưu state local sau khi edit
+  const [localInfo, setLocalInfo] = useState(null);
 
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
@@ -685,21 +663,19 @@ function FacilityDetailsPage() {
     load();
   }, [id]);
 
+  const handleSaveImages = (newUrls) => {
+    setFacility((prev) => ({
+      ...prev,
+      imageUrls: [...(prev.imageUrls || []), ...newUrls],
+    }));
+  };
+
   const handleSaveOptions = (updated) => {
     setLocalInfo((prev) => ({ ...prev, ...updated }));
   };
 
   const handleSaveInfo = (updated) => {
     setLocalInfo((prev) => ({ ...prev, ...updated }));
-  };
-
-  const getStatusStyle = (status) => {
-    const map = {
-      APPROVED: { label: "승인됨", color: "#2ecc71" },
-      PENDING: { label: "대기중", color: "#f39c12" },
-      REJECTED: { label: "거절됨", color: "#e74c3c" },
-    };
-    return map[status] || { label: status || "-", color: "#95a5a6" };
   };
 
   const renderTargetInfo = (target) => {
@@ -807,12 +783,10 @@ function FacilityDetailsPage() {
             >
               📝 정보 수정
             </button>
-
             <button
               style={styles.btnImage}
               onClick={() => setShowImageModal(true)}
             >
-              {" "}
               📷 사진 추가
             </button>
           </div>
@@ -896,6 +870,7 @@ function FacilityDetailsPage() {
                     </span>
                   </div>
                 </div>
+
                 <div style={styles.infoGrid}>
                   <InfoItem label="시설명" value={info.name} />
                   <InfoItem label="유형" value={facility.facilityType} />
@@ -917,6 +892,20 @@ function FacilityDetailsPage() {
                     }
                   />
                 </div>
+
+                {/* ── RATING ── */}
+                <div style={styles.ratingBox}>
+                  <span style={styles.ratingStar}>★</span>
+                  <span style={styles.ratingValue}>
+                    {info.averageRating != null
+                      ? Number(info.averageRating).toFixed(1)
+                      : "—"}
+                  </span>
+                  <span style={styles.ratingCount}>
+                    ({info.totalReviews ?? 0}개 평가)
+                  </span>
+                </div>
+
                 {info.description && (
                   <div style={styles.descBox}>
                     <span style={styles.noteLabel}>📝 시설 설명</span>
@@ -972,9 +961,9 @@ function FacilityDetailsPage() {
       {showInfoModal && (
         <InfoModal
           facilityId={id}
-          facilityType={facility.facilityType} // "SPORT" | "MOTEL" | "RESTAURANT"
+          facilityType={facility.facilityType}
           info={info}
-          target={facility.facilityTarget} // chứa hourPrice, nightPrice, foodType
+          target={facility.facilityTarget}
           onClose={() => setShowInfoModal(false)}
           onSave={handleSaveInfo}
         />
@@ -990,7 +979,6 @@ function FacilityDetailsPage() {
   );
 }
 
-// ── Helper ──
 function InfoItem({ label, value, span }) {
   return (
     <div style={{ gridColumn: span ? "1 / -1" : undefined }}>
@@ -1060,6 +1048,17 @@ const styles = {
     cursor: "pointer",
     boxShadow: "0 3px 10px rgba(17,153,142,0.35)",
   },
+  btnImage: {
+    padding: "9px 18px",
+    borderRadius: "8px",
+    border: "none",
+    background: "linear-gradient(135deg,#3498db,#2980b9)",
+    color: "#fff",
+    fontSize: "13px",
+    fontWeight: "700",
+    cursor: "pointer",
+    boxShadow: "0 3px 10px rgba(52,152,219,0.35)",
+  },
   mainContent: { padding: "30px", maxWidth: "1200px", margin: "0 auto" },
   statusText: {
     textAlign: "center",
@@ -1122,6 +1121,32 @@ const styles = {
     gap: "16px",
     marginBottom: "16px",
   },
+
+  /* ── RATING ── */
+  ratingBox: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "6px",
+    backgroundColor: "#fffbf0",
+    border: "1px solid #fde8a0",
+    borderRadius: "8px",
+    padding: "7px 14px",
+    marginBottom: "14px",
+  },
+  ratingStar: {
+    fontSize: "16px",
+    color: "#f5a623",
+  },
+  ratingValue: {
+    fontSize: "15px",
+    fontWeight: "700",
+    color: "#2c3e50",
+  },
+  ratingCount: {
+    fontSize: "12px",
+    color: "#aaa",
+  },
+
   descBox: {
     backgroundColor: "#fafbfc",
     borderRadius: "8px",
@@ -1149,6 +1174,22 @@ const styles = {
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
+  },
+  btnMenu: {
+    padding: "8px 16px",
+    borderRadius: "8px",
+    border: "1px solid #ddd",
+    backgroundColor: "#fff",
+    fontSize: "13px",
+    fontWeight: "600",
+    cursor: "pointer",
+    color: "#2c3e50",
+    marginTop: "8px",
+  },
+  btnRow: {
+    display: "flex",
+    gap: "10px",
+    marginTop: "8px",
   },
 };
 
@@ -1287,17 +1328,6 @@ const modalStyles = {
     fontWeight: "700",
     cursor: "pointer",
     fontFamily: "inherit",
-  },
-  btnImage: {
-    padding: "9px 18px",
-    borderRadius: "8px",
-    border: "none",
-    background: "linear-gradient(135deg,#3498db,#2980b9)",
-    color: "#fff",
-    fontSize: "13px",
-    fontWeight: "700",
-    cursor: "pointer",
-    boxShadow: "0 3px 10px rgba(52,152,219,0.35)",
   },
 };
 

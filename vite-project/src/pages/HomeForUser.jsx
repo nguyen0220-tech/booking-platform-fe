@@ -16,6 +16,13 @@ const formatUsageDate = (dateStr) => {
   });
 };
 
+const POPULAR_DESTINATIONS = [
+  { slug: "seoul", name: "서울", image: "/seoul.jpg" },
+  { slug: "busan", name: "부산", image: "/busan.jpg" },
+  { slug: "jeju", name: "제주", image: "/jeju.jpg" },
+  { slug: "gangneung", name: "강릉", image: "/gangneung.jpg" },
+];
+
 function HomeForUser() {
   const [user, setUser] = useState(null);
   const [upcomingBookings, setUpcomingBookings] = useState([]);
@@ -92,10 +99,18 @@ function HomeForUser() {
     <div style={styles.layout}>
       {/* ── NAVBAR ── */}
       <nav style={styles.navbar}>
-        <div style={styles.navBrand}>🏠 CUK Booking</div>
+        <div style={styles.navBrand}>
+          <span style={styles.logoIcon}>CUK</span> Booking
+        </div>
         <div style={styles.navLinks}>
+          <a href="#" style={styles.navTextLink}>
+            📜 서비스 약관
+          </a>
+          <a href="#" style={styles.navTextLink}>
+            🫶 도움 받기
+          </a>
           <button style={styles.navButton} onClick={() => navigate("/profile")}>
-            <span style={styles.icon}>👤</span> 내 페이지
+            <span style={styles.icon}>👤</span> 마이페이지
           </button>
           <button
             style={styles.navButton}
@@ -131,7 +146,6 @@ function HomeForUser() {
         <section style={styles.section}>
           <h3 style={styles.sectionTitle}>📆 다가오는 예약</h3>
 
-          {/* Bộ chọn số ngày */}
           <div style={styles.dayFilter}>
             {[1, 3, 7].map((d) => (
               <button
@@ -179,16 +193,13 @@ function HomeForUser() {
             <span style={styles.dayHint}>{daysLatter}일 이내 예약</span>
           </div>
 
-          {/* Danh sách booking */}
           {loadingBookings ? (
             <div style={styles.placeholderBox}>
               <span style={styles.placeholderText}>불러오는 중...</span>
             </div>
           ) : upcomingBookings.length === 0 ? (
             <div style={styles.placeholderBox}>
-              <span style={styles.placeholderText}>
-                Chưa có lịch hẹn nào sắp tới
-              </span>
+              <span style={styles.placeholderText}>다가오는 예약이 없네요</span>
             </div>
           ) : (
             <div style={styles.bookingList}>
@@ -239,16 +250,29 @@ function HomeForUser() {
           )}
         </section>
 
+        {/* ── POPULAR DESTINATIONS ── */}
         <section style={styles.section}>
           <h3 style={styles.sectionTitle}>국내 인기 여행지</h3>
-          <div style={styles.cardGrid}>
-            <div style={styles.emptyCard}>
-              <span style={styles.placeholderText}>Chưa có dữ liệu</span>
-            </div>
+          <div style={styles.destinationRow}>
+            {POPULAR_DESTINATIONS.map((dest) => (
+              <div
+                key={dest.slug}
+                style={styles.destinationCard}
+                onClick={() => navigate(`/destinations/${dest.slug}`)}
+              >
+                <img
+                  src={dest.image}
+                  alt={dest.name}
+                  style={styles.destinationImg}
+                />
+                <div style={styles.destinationOverlay} />
+                <span style={styles.destinationName}>{dest.name}</span>
+              </div>
+            ))}
           </div>
         </section>
 
-        {/* ── ĐỀ XUẤT ── */}
+        {/* ── 추천 시설 ── */}
         <section style={styles.section}>
           <h3 style={styles.sectionTitle}>✨ 추천 시설</h3>
           {loadingSuggestions ? (
@@ -258,7 +282,7 @@ function HomeForUser() {
           ) : suggestedFacilities.length === 0 ? (
             <div style={styles.cardGrid}>
               <div style={styles.emptyCard}>
-                <span style={styles.placeholderText}>Chưa có dữ liệu</span>
+                <span style={styles.placeholderText}>데이터가 없습니다</span>
               </div>
             </div>
           ) : (
@@ -294,6 +318,20 @@ function HomeForUser() {
                       <span style={styles.facilityAddress}>
                         📍 {facility.facilityInfo?.address ?? "—"}
                       </span>
+                      {/* ── RATING ── */}
+                      <div style={styles.facilityRatingRow}>
+                        <span style={styles.facilityRatingStar}>★</span>
+                        <span style={styles.facilityRatingValue}>
+                          {facility.facilityInfo?.averageRating != null
+                            ? Number(
+                                facility.facilityInfo.averageRating,
+                              ).toFixed(1)
+                            : "—"}
+                        </span>
+                        <span style={styles.facilityReviewCount}>
+                          ({facility.facilityInfo?.totalReviews ?? 0}개 평가)
+                        </span>
+                      </div>
                     </div>
                   </div>
                 );
@@ -302,30 +340,28 @@ function HomeForUser() {
           )}
         </section>
 
-        {/* ── HÀNG CUỐI: Thống kê + Thông báo ── */}
+        {/* ── HÀNG CUỐI ── */}
         <div style={styles.bottomRow}>
-          {/* Thống kê */}
           <section style={{ ...styles.section, flex: 1 }}>
-            <h3 style={styles.sectionTitle}>📊 내 활동 — Thống kê của tôi</h3>
+            <h3 style={styles.sectionTitle}>📊 내 활동</h3>
             <div style={styles.statGrid}>
               <div style={styles.statCard}>
                 <span style={styles.statNum}>—</span>
-                <span style={styles.statLabel}>Tổng đặt chỗ</span>
+                <span style={styles.statLabel}>총 예약 수</span>
               </div>
               <div style={styles.statCard}>
                 <span style={styles.statNum}>—</span>
-                <span style={styles.statLabel}>Tháng này</span>
+                <span style={styles.statLabel}>이번 달 예약 수</span>
               </div>
               <div style={styles.statCard}>
                 <span style={styles.statNum}>—</span>
-                <span style={styles.statLabel}>Yêu thích</span>
+                <span style={styles.statLabel}>총 리뷰 작성</span>
               </div>
             </div>
           </section>
 
-          {/* Thông báo */}
           <section style={{ ...styles.section, flex: 1 }}>
-            <h3 style={styles.sectionTitle}>🔔 공지사항 — Thông báo</h3>
+            <h3 style={styles.sectionTitle}>🔔 공지사항</h3>
             <div style={styles.placeholderBox}>
               <span style={styles.placeholderText}>Không có thông báo mới</span>
             </div>
@@ -350,23 +386,37 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#ffffff",
-    padding: "10px 24px",
-    borderBottom: "1px solid #eaeaea",
+    backgroundColor: "#208a8a",
+    padding: "12px 32px",
     position: "sticky",
     top: 0,
     zIndex: 1000,
-    boxShadow: "0 2px 5px rgba(0,0,0,0.05)",
+    boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
   },
   navBrand: {
-    fontSize: "20px",
+    fontSize: "22px",
     fontWeight: "bold",
-    color: "#2c3e50",
+    color: "#ffffff",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+  },
+  logoIcon: {
+    backgroundColor: "rgba(255,255,255,0.2)",
+    padding: "2px 8px",
+    borderRadius: "6px",
   },
   navLinks: {
     display: "flex",
     alignItems: "center",
-    gap: "8px",
+    gap: "12px",
+  },
+  navTextLink: {
+    color: "#e0f2f1",
+    textDecoration: "none",
+    fontSize: "14px",
+    fontWeight: "500",
+    marginRight: "8px",
   },
   navButton: {
     padding: "8px 14px",
@@ -378,32 +428,30 @@ const styles = {
     display: "flex",
     alignItems: "center",
     backgroundColor: "transparent",
-    color: "#34495e",
+    color: "#e0f2f1",
   },
-  icon: {
-    marginRight: "6px",
-    fontSize: "15px",
-  },
+  icon: { marginRight: "6px", fontSize: "16px" },
   navDivider: {
     width: "1px",
-    height: "24px",
-    backgroundColor: "#ddd",
+    height: "20px",
+    backgroundColor: "#4db6ac",
     margin: "0 8px",
   },
   userName: {
     fontSize: "14px",
     fontWeight: "600",
-    color: "#2c3e50",
+    color: "#ffffff",
   },
   logoutButton: {
-    padding: "6px 12px",
+    padding: "6px 14px",
     fontSize: "13px",
-    borderRadius: "4px",
-    border: "1px solid #e74c3c",
-    backgroundColor: "#fff",
-    color: "#e74c3c",
+    fontWeight: "bold",
+    borderRadius: "20px",
+    border: "none",
+    backgroundColor: "#ffffff",
+    color: "#208a8a",
     cursor: "pointer",
-    marginLeft: "8px",
+    marginLeft: "12px",
   },
 
   /* SEARCH BAR */
@@ -516,7 +564,7 @@ const styles = {
     cursor: "pointer",
   },
 
-  /* BOOKING LIST — hiển thị dạng hàng ngang, cuộn ngang khi nhiều booking */
+  /* BOOKING LIST */
   bookingList: {
     display: "flex",
     flexDirection: "row",
@@ -655,6 +703,7 @@ const styles = {
     width: "100%",
     height: "120px",
     backgroundColor: "#f0f2f5",
+    flexShrink: 0,
   },
   facilityThumb: {
     width: "100%",
@@ -677,7 +726,8 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     gap: "4px",
-    padding: "10px 12px",
+    padding: "10px 12px 12px",
+    flex: 1,
   },
   facilityName: {
     fontSize: "13px",
@@ -687,6 +737,27 @@ const styles = {
   facilityAddress: {
     fontSize: "11px",
     color: "#7f8c8d",
+  },
+  facilityRatingRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: "4px",
+    borderTop: "1px solid #f0f0f0",
+    paddingTop: "7px",
+    marginTop: "4px",
+  },
+  facilityRatingStar: {
+    fontSize: "11px",
+    color: "#f5a623",
+  },
+  facilityRatingValue: {
+    fontSize: "11px",
+    fontWeight: "700",
+    color: "#2c3e50",
+  },
+  facilityReviewCount: {
+    fontSize: "10px",
+    color: "#aaa",
   },
 
   /* BOTTOM ROW */
@@ -720,6 +791,46 @@ const styles = {
     fontSize: "11px",
     color: "#7f8c8d",
     textAlign: "center",
+  },
+
+  /* POPULAR DESTINATIONS */
+  destinationRow: {
+    display: "flex",
+    flexDirection: "row",
+    gap: "14px",
+    overflowX: "auto",
+    paddingBottom: "10px",
+    scrollbarWidth: "thin",
+  },
+  destinationCard: {
+    position: "relative",
+    flex: "0 0 220px",
+    minWidth: "220px",
+    height: "140px",
+    borderRadius: "10px",
+    overflow: "hidden",
+    cursor: "pointer",
+    boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+  },
+  destinationImg: {
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+    display: "block",
+  },
+  destinationOverlay: {
+    position: "absolute",
+    inset: 0,
+    background: "linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 55%)",
+  },
+  destinationName: {
+    position: "absolute",
+    bottom: "12px",
+    left: "14px",
+    color: "#fff",
+    fontSize: "16px",
+    fontWeight: "700",
+    textShadow: "0 1px 3px rgba(0,0,0,0.4)",
   },
 };
 
