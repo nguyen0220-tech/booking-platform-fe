@@ -36,9 +36,11 @@ function HomeForAdmin() {
 
   return (
     <div style={styles.layout}>
-      {/* NAVBAR */}
+      {/* ── NAVBAR ── */}
       <nav style={styles.navbar}>
-        <div style={styles.navBrand}>🏠 CUK Booking</div>
+        <div style={styles.navBrand}>
+          <span style={styles.logoIcon}>CUK</span> Booking
+        </div>
 
         <div style={styles.navLinks}>
           <button style={styles.navButton} onClick={() => navigate("/profile")}>
@@ -59,12 +61,11 @@ function HomeForAdmin() {
             <span style={styles.icon}>📋</span> 등록요청관리
           </button>
 
-          <div style={styles.userInfo}>
-            <span style={styles.userName}>Hello, {user.fullName}!</span>
-            <button style={styles.logoutButton} onClick={handleLogout}>
-              Logout
-            </button>
-          </div>
+          <div style={styles.navDivider} />
+          <span style={styles.userName}>Hello, {user.fullName}!</span>
+          <button style={styles.logoutButton} onClick={handleLogout}>
+            Logout
+          </button>
         </div>
       </nav>
 
@@ -90,30 +91,39 @@ const styles = {
     backgroundColor: "#f5f6fa",
     fontFamily: "Arial, sans-serif",
   },
+
+  /* NAVBAR - đồng bộ với HomeForUser / HomeForProvider */
   navbar: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#ffffff",
-    padding: "10px 20px",
-    boxShadow: "0 2px 5px rgba(0,0,0,0.05)",
-    borderBottom: "1px solid #eaeaea",
+    backgroundColor: "#208a8a",
+    padding: "12px 32px",
     position: "sticky",
     top: 0,
     zIndex: 1000,
+    boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
   },
   navBrand: {
-    fontSize: "20px",
+    fontSize: "22px",
     fontWeight: "bold",
-    color: "#2c3e50",
+    color: "#ffffff",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+  },
+  logoIcon: {
+    backgroundColor: "rgba(255,255,255,0.2)",
+    padding: "2px 8px",
+    borderRadius: "6px",
   },
   navLinks: {
     display: "flex",
     alignItems: "center",
-    gap: "10px",
+    gap: "12px",
   },
   navButton: {
-    padding: "8px 15px",
+    padding: "8px 14px",
     fontSize: "14px",
     fontWeight: "500",
     borderRadius: "6px",
@@ -122,39 +132,38 @@ const styles = {
     display: "flex",
     alignItems: "center",
     backgroundColor: "transparent",
-    color: "#34495e",
+    color: "#e0f2f1",
   },
-  icon: {
-    marginRight: "6px",
-    fontSize: "16px",
-  },
+  icon: { marginRight: "6px", fontSize: "16px" },
   adminNavButton: {
-    color: "#e74c3c",
+    color: "#ffe1de",
     fontWeight: "bold",
-    backgroundColor: "#fdf1f0",
+    backgroundColor: "rgba(231, 76, 60, 0.25)",
   },
-  userInfo: {
-    display: "flex",
-    alignItems: "center",
-    gap: "15px",
-    marginLeft: "20px",
-    paddingLeft: "20px",
-    borderLeft: "1px solid #ddd",
+  navDivider: {
+    width: "1px",
+    height: "20px",
+    backgroundColor: "#4db6ac",
+    margin: "0 8px",
   },
   userName: {
     fontSize: "14px",
     fontWeight: "600",
-    color: "#2c3e50",
+    color: "#ffffff",
   },
   logoutButton: {
-    padding: "6px 12px",
+    padding: "6px 14px",
     fontSize: "13px",
-    borderRadius: "4px",
-    border: "1px solid #e74c3c",
-    backgroundColor: "#fff",
-    color: "#e74c3c",
+    fontWeight: "bold",
+    borderRadius: "20px",
+    border: "none",
+    backgroundColor: "#ffffff",
+    color: "#208a8a",
     cursor: "pointer",
+    marginLeft: "12px",
   },
+
+  /* CONTENT */
   mainContent: {
     flex: 1,
     padding: "30px",

@@ -104,10 +104,10 @@ function HomeForUser() {
         </div>
         <div style={styles.navLinks}>
           <a href="#" style={styles.navTextLink}>
-            📜 서비스 약관
+            <span style={styles.icon}>📜</span> 서비스 약관
           </a>
           <a href="#" style={styles.navTextLink}>
-            🫶 도움 받기
+            <span style={styles.icon}>🫶</span> 도움 받기
           </a>
           <button style={styles.navButton} onClick={() => navigate("/profile")}>
             <span style={styles.icon}>👤</span> 마이페이지
@@ -363,7 +363,7 @@ function HomeForUser() {
           <section style={{ ...styles.section, flex: 1 }}>
             <h3 style={styles.sectionTitle}>🔔 공지사항</h3>
             <div style={styles.placeholderBox}>
-              <span style={styles.placeholderText}>Không có thông báo mới</span>
+              <span style={styles.placeholderText}>공지가 없습니다</span>
             </div>
           </section>
         </div>

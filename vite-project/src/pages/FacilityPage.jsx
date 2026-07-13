@@ -111,8 +111,11 @@ function FacilityPage() {
       {/* HEADER */}
       <header style={styles.header}>
         <div style={styles.headerLeft}>
-          <button style={styles.backButton} onClick={() => navigate("/home")}>
-            ⬅ Quay lại
+          <button
+            style={styles.backButton}
+            onClick={() => navigate("/provider")}
+          >
+            ⬅ Home
           </button>
           <h1 style={styles.pageTitle}>📦 시설 관리</h1>
         </div>

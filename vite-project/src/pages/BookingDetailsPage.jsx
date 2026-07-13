@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { fetchBookingDetail, cancelBooking } from "../api/bookingApi";
+import { createReview } from "../api/reviewApi";
 
 const STATUS_CONFIG = {
   PAID: {
@@ -29,6 +30,18 @@ const PAY_METHOD_LABEL = {
   NAVER_PAY: "네이버페이",
   TOSS: "토스",
   BANK_TRANSFER: "계좌이체",
+};
+
+// reviewEligibility.reviewStatus에 따른 버튼 표시 상태
+// ELIGIBLE: 클릭 가능 / ALREADY_REVIEWED, EXPIRED, NOT_YET_COMPLETED: 비활성화(흐리게) / BOOKING_CANCELLED: 버튼 자체를 숨김
+const REVIEW_STATUS_CONFIG = {
+  ELIGIBLE: { label: "⭐ 이용 후기 작성", disabled: false },
+  ALREADY_REVIEWED: { label: "✅ 후기 작성 완료", disabled: true },
+  EXPIRED: { label: "⏰ 평가 기간이 만료되었습니다", disabled: true },
+  NOT_YET_COMPLETED: {
+    label: "예약을 아직 이용하지 않았습니다",
+    disabled: true,
+  },
 };
 
 function getStatus(status) {
@@ -143,6 +156,76 @@ function MetaChip({ icon, label, value }) {
   );
 }
 
+// ── ReviewModal ───────────────────────────────────────────────────────────────
+function ReviewModal({ onClose, onSubmit, submitting, submitError }) {
+  const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [content, setContent] = useState("");
+
+  const handleSubmit = () => {
+    if (rating === 0) return;
+    onSubmit({ rating, content });
+  };
+
+  return (
+    <div style={rm.backdrop} onClick={onClose}>
+      <div style={rm.modal} onClick={(e) => e.stopPropagation()}>
+        <h2 style={rm.title}>이용 후기 작성</h2>
+
+        <div style={rm.starsRow}>
+          {[1, 2, 3, 4, 5].map((n) => (
+            <button
+              key={n}
+              type="button"
+              style={rm.starBtn}
+              onMouseEnter={() => setHoverRating(n)}
+              onMouseLeave={() => setHoverRating(0)}
+              onClick={() => setRating(n)}
+              aria-label={`${n}점`}
+            >
+              <span
+                style={{
+                  ...rm.star,
+                  color: n <= (hoverRating || rating) ? "#FFB800" : "#ddd",
+                }}
+              >
+                ★
+              </span>
+            </button>
+          ))}
+        </div>
+
+        <textarea
+          style={rm.textarea}
+          placeholder="이용 후기를 남겨주세요."
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          rows={5}
+          maxLength={1000}
+        />
+
+        {submitError && <div style={rm.errorBox}>⚠️ {submitError}</div>}
+
+        <div style={rm.actions}>
+          <button style={rm.cancelBtn} onClick={onClose} disabled={submitting}>
+            취소
+          </button>
+          <button
+            style={{
+              ...rm.submitBtn,
+              ...(rating === 0 || submitting ? rm.submitBtnDisabled : {}),
+            }}
+            onClick={handleSubmit}
+            disabled={rating === 0 || submitting}
+          >
+            {submitting ? "등록 중..." : "등록하기"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── BookingDetailPage ─────────────────────────────────────────────────────────
 export default function BookingDetailPage() {
   const { bookingId } = useParams();
@@ -153,6 +236,13 @@ export default function BookingDetailPage() {
   const [error, setError] = useState("");
   const [cancelling, setCancelling] = useState(false);
   const [cancelError, setCancelError] = useState("");
+
+  // 리뷰 작성 관련 상태
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [reviewSubmitError, setReviewSubmitError] = useState("");
+  // 리뷰 등록 성공 시 서버 재조회 없이 즉시 ALREADY_REVIEWED로 낙관적 반영
+  const [reviewJustSubmitted, setReviewJustSubmitted] = useState(false);
 
   useEffect(() => {
     if (!bookingId) {
@@ -185,6 +275,20 @@ export default function BookingDetailPage() {
       setCancelError(err.message || "예약 취소에 실패했습니다.");
     } finally {
       setCancelling(false);
+    }
+  };
+
+  const handleReviewSubmit = async ({ rating, content }) => {
+    setSubmittingReview(true);
+    setReviewSubmitError("");
+    try {
+      await createReview({ bookingId, rating, content });
+      setReviewJustSubmitted(true);
+      setIsReviewModalOpen(false);
+    } catch (err) {
+      setReviewSubmitError(err.message || "리뷰 등록에 실패했습니다.");
+    } finally {
+      setSubmittingReview(false);
     }
   };
 
@@ -221,10 +325,19 @@ export default function BookingDetailPage() {
     booking.packageInfo?.infoDetails?.packageName ?? "패키지명 없음";
   const note = booking.packageInfo?.infoDetails?.note ?? "";
   const isPaid = booking.status === "PAID";
-  const isCompleted = booking.status === "COMPLETED";
 
   // usageDate가 오늘 이전이면 취소 버튼 숨김
   const isPast = isDatePast(booking.usageDate);
+
+  // BOOKING_CANCELLED면 리뷰 버튼 자체를 숨긴다.
+  // 리뷰를 방금 등록했다면(reviewJustSubmitted) 서버 값과 무관하게 완료 상태로 낙관적 표시.
+  const rawReviewStatus = booking.reviewEligibility?.reviewStatus;
+  const effectiveReviewStatus = reviewJustSubmitted
+    ? "ALREADY_REVIEWED"
+    : rawReviewStatus;
+  const showReviewButton =
+    !!effectiveReviewStatus && effectiveReviewStatus !== "BOOKING_CANCELLED";
+  const reviewBtnConfig = REVIEW_STATUS_CONFIG[effectiveReviewStatus];
 
   const goToFacility = () => {
     if (facilityId) navigate(`/facilities/${facilityId}`);
@@ -329,19 +442,21 @@ export default function BookingDetailPage() {
         </section>
 
         {/* ── 액션 버튼 ── */}
-        {(isCompleted || isPaid) && (
+        {(showReviewButton || (isPaid && !isPast)) && (
           <div style={s.actions}>
             {cancelError && (
               <div style={s.cancelErrorBox}>⚠️ {cancelError}</div>
             )}
-            {isCompleted && (
+            {showReviewButton && (
               <button
-                style={s.reviewBtn}
-                onClick={() => {
-                  /* TODO: 리뷰 작성 */
+                style={{
+                  ...s.reviewBtn,
+                  ...(reviewBtnConfig?.disabled ? s.reviewBtnDone : {}),
                 }}
+                onClick={() => setIsReviewModalOpen(true)}
+                disabled={reviewBtnConfig?.disabled}
               >
-                ⭐ 이용 후기 작성
+                {reviewBtnConfig?.label ?? "⭐ 이용 후기 작성"}
               </button>
             )}
             {/* isPast이면 취소 버튼 숨김 */}
@@ -360,6 +475,21 @@ export default function BookingDetailPage() {
           </div>
         )}
       </div>
+
+      {/* ── 리뷰 작성 모달 ── */}
+      {isReviewModalOpen && (
+        <ReviewModal
+          onClose={() => {
+            if (!submittingReview) {
+              setIsReviewModalOpen(false);
+              setReviewSubmitError("");
+            }
+          }}
+          onSubmit={handleReviewSubmit}
+          submitting={submittingReview}
+          submitError={reviewSubmitError}
+        />
+      )}
     </div>
   );
 }
@@ -438,6 +568,102 @@ const sl = {
     borderRadius: "20px",
     padding: "2px 10px",
     zIndex: 2,
+  },
+};
+
+// ── Review Modal Styles ────────────────────────────────────────────────────────
+const rm = {
+  backdrop: {
+    position: "fixed",
+    inset: 0,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    display: "flex",
+    alignItems: "flex-end",
+    justifyContent: "center",
+    zIndex: 100,
+  },
+  modal: {
+    width: "100%",
+    maxWidth: "680px",
+    backgroundColor: "#fff",
+    borderTopLeftRadius: "20px",
+    borderTopRightRadius: "20px",
+    padding: "24px 20px 28px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "16px",
+  },
+  title: {
+    fontSize: "17px",
+    fontWeight: "700",
+    color: "#1a1a2e",
+    margin: 0,
+    textAlign: "center",
+  },
+  starsRow: {
+    display: "flex",
+    justifyContent: "center",
+    gap: "6px",
+  },
+  starBtn: {
+    background: "none",
+    border: "none",
+    padding: 0,
+    cursor: "pointer",
+    lineHeight: 1,
+  },
+  star: {
+    fontSize: "34px",
+    transition: "color 0.1s",
+  },
+  textarea: {
+    width: "100%",
+    boxSizing: "border-box",
+    border: "1px solid #eaeaea",
+    borderRadius: "12px",
+    padding: "12px 14px",
+    fontSize: "14px",
+    fontFamily: "inherit",
+    resize: "none",
+    outline: "none",
+  },
+  errorBox: {
+    backgroundColor: "#fff5f5",
+    border: "1px solid #feb2b2",
+    color: "#c53030",
+    borderRadius: "10px",
+    padding: "10px 14px",
+    fontSize: "13px",
+  },
+  actions: {
+    display: "flex",
+    gap: "10px",
+  },
+  cancelBtn: {
+    flex: 1,
+    padding: "14px",
+    fontSize: "15px",
+    fontWeight: "600",
+    backgroundColor: "#f4f4f4",
+    color: "#555",
+    border: "none",
+    borderRadius: "14px",
+    cursor: "pointer",
+  },
+  submitBtn: {
+    flex: 2,
+    padding: "14px",
+    fontSize: "15px",
+    fontWeight: "700",
+    backgroundColor: "#4CAF50",
+    color: "#fff",
+    border: "none",
+    borderRadius: "14px",
+    cursor: "pointer",
+  },
+  submitBtnDisabled: {
+    opacity: 0.5,
+    cursor: "not-allowed",
   },
 };
 
@@ -614,6 +840,11 @@ const s = {
     border: "none",
     borderRadius: "14px",
     cursor: "pointer",
+  },
+  reviewBtnDone: {
+    backgroundColor: "#eee",
+    color: "#999",
+    cursor: "not-allowed",
   },
   cancelBtn: {
     width: "100%",

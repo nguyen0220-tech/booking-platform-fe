@@ -5,6 +5,22 @@ import BookingModal from "../pages/BookingModal";
 
 const PKG_SIZE = 5;
 
+function normalizeRating(rating) {
+  const parsed = Number(rating);
+  return isNaN(parsed) ? 0 : parsed;
+}
+
+function formatReviewDate(dateStr) {
+  if (!dateStr) return "";
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return dateStr;
+  return date.toLocaleDateString("ko-KR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+}
+
 function PackagePublicViewPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -17,6 +33,8 @@ function PackagePublicViewPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [bookingPkg, setBookingPkg] = useState(null);
+  const [reviews, setReviews] = useState([]);
+  const [ratingGroupBy, setRatingGroupBy] = useState([]);
 
   const fetchDetail = useCallback(
     async (page) => {
@@ -31,6 +49,8 @@ function PackagePublicViewPage() {
         setFacility(data);
         setPackages(data.packages?.data || []);
         setPageInfo(data.packages?.pageInfo || null);
+        setReviews(data.reviews?.data || []);
+        setRatingGroupBy(data.ratingGroupBy || []);
       } catch (err) {
         setError(err.message || "데이터를 불러오는 중 오류가 발생했습니다.");
       } finally {
@@ -66,6 +86,18 @@ function PackagePublicViewPage() {
   }
 
   const { facilityType, facilityInfo, imageUrls = [] } = facility;
+
+  // ratingGroupBy는 rating(1~5)별 count로 내려옴. 배열에 없는 별점은 count 0으로 취급.
+  const ratingCountMap = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+  ratingGroupBy.forEach((g) => {
+    if (g.rating >= 1 && g.rating <= 5) {
+      ratingCountMap[g.rating] = g.count || 0;
+    }
+  });
+  const totalRatingCount = Object.values(ratingCountMap).reduce(
+    (sum, c) => sum + c,
+    0,
+  );
 
   return (
     <div style={styles.layout}>
@@ -247,21 +279,39 @@ function PackagePublicViewPage() {
               </span>
             </div>
             <div style={styles.reviewBars}>
-              {[5, 4, 3, 2, 1].map((star) => (
-                <div key={star} style={styles.reviewBarRow}>
-                  <span style={styles.reviewBarLabel}>{star}★</span>
-                  <div style={styles.reviewBarTrack}>
-                    <div style={{ ...styles.reviewBarFill, width: "0%" }} />
+              {[5, 4, 3, 2, 1].map((star) => {
+                const count = ratingCountMap[star] || 0;
+                const percent =
+                  totalRatingCount > 0 ? (count / totalRatingCount) * 100 : 0;
+                return (
+                  <div key={star} style={styles.reviewBarRow}>
+                    <span style={styles.reviewBarLabel}>{star}★</span>
+                    <div style={styles.reviewBarTrack}>
+                      <div
+                        style={{
+                          ...styles.reviewBarFill,
+                          width: `${percent}%`,
+                        }}
+                      />
+                    </div>
+                    <span style={styles.reviewBarCount}>{count}</span>
                   </div>
-                  <span style={styles.reviewBarCount}>0</span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
-          <div style={styles.emptyBox}>
-            <p style={styles.stateText}>아직 리뷰가 없습니다</p>
-          </div>
+          {reviews.length === 0 ? (
+            <div style={styles.emptyBox}>
+              <p style={styles.stateText}>아직 리뷰가 없습니다</p>
+            </div>
+          ) : (
+            <div style={styles.reviewList}>
+              {reviews.map((review) => (
+                <ReviewCard key={review.id} review={review} />
+              ))}
+            </div>
+          )}
         </section>
       </main>
 
@@ -276,6 +326,44 @@ function PackagePublicViewPage() {
           }}
         />
       )}
+    </div>
+  );
+}
+
+// ── ReviewCard Component ─────────────────────────────────────────────────────
+function ReviewCard({ review }) {
+  const stars = normalizeRating(review.rating);
+  const reviewerName = review.reviewer?.infoDetails?.fullName || "익명";
+  const avatarUrl = review.reviewer?.infoDetails?.avatarUrl;
+
+  return (
+    <div style={reviewStyles.card}>
+      {avatarUrl ? (
+        <img
+          src={avatarUrl}
+          alt={reviewerName}
+          style={reviewStyles.avatar}
+          onError={(e) => {
+            e.target.style.display = "none";
+          }}
+        />
+      ) : (
+        <div style={reviewStyles.avatarFallback}>{reviewerName.charAt(0)}</div>
+      )}
+
+      <div style={reviewStyles.body}>
+        <div style={reviewStyles.metaRow}>
+          <span style={reviewStyles.reviewerName}>{reviewerName}</span>
+          <span style={reviewStyles.stars}>
+            {"★".repeat(stars)}
+            <span style={reviewStyles.starsEmpty}>{"★".repeat(5 - stars)}</span>
+          </span>
+          <span style={reviewStyles.date}>
+            {formatReviewDate(review.createdAt)}
+          </span>
+        </div>
+        {review.content && <p style={reviewStyles.content}>{review.content}</p>}
+      </div>
     </div>
   );
 }
@@ -686,6 +774,79 @@ const styles = {
     borderRadius: "99px",
   },
   reviewBarCount: { fontSize: "12px", color: "#aaa", width: "20px" },
+  reviewList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "12px",
+  },
+};
+
+const reviewStyles = {
+  card: {
+    backgroundColor: "#fff",
+    border: "1px solid #eaeaea",
+    borderRadius: "10px",
+    padding: "12px 14px",
+    display: "flex",
+    gap: "10px",
+    alignItems: "flex-start",
+  },
+  avatar: {
+    width: "32px",
+    height: "32px",
+    borderRadius: "50%",
+    objectFit: "cover",
+    flexShrink: 0,
+  },
+  avatarFallback: {
+    width: "32px",
+    height: "32px",
+    borderRadius: "50%",
+    backgroundColor: "#e8f5e9",
+    color: "#2e7d32",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontWeight: "bold",
+    fontSize: "13px",
+    flexShrink: 0,
+  },
+  body: {
+    flex: 1,
+    minWidth: 0,
+    display: "flex",
+    flexDirection: "column",
+    gap: "4px",
+  },
+  metaRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    flexWrap: "wrap",
+  },
+  reviewerName: {
+    fontSize: "13px",
+    fontWeight: "600",
+    color: "#2c3e50",
+  },
+  stars: {
+    fontSize: "12px",
+    color: "#EF9F27",
+    letterSpacing: "1px",
+  },
+  starsEmpty: { color: "#ddd" },
+  date: {
+    fontSize: "11px",
+    color: "#aaa",
+    marginLeft: "auto",
+  },
+  content: {
+    fontSize: "13px",
+    color: "#555",
+    margin: 0,
+    lineHeight: "1.5",
+    whiteSpace: "pre-wrap",
+  },
 };
 
 const pkgStyles = {

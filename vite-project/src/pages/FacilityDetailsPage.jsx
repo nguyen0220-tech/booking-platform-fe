@@ -8,6 +8,29 @@ import {
   addFacilityImagesApi,
 } from "../api/facilityApi";
 
+/* ────────────────────────────────────────────────
+   DESIGN TOKENS
+   Đồng bộ với tông teal (#208a8a) dùng ở navbar
+──────────────────────────────────────────────────*/
+const tokens = {
+  teal900: "#0d5c5c",
+  teal700: "#208a8a",
+  teal600: "#2a9d9d",
+  teal100: "#e6f5f4",
+  teal50: "#f3fbfa",
+  ink900: "#1e2b3a",
+  ink600: "#54637a",
+  ink400: "#95a5a6",
+  border: "#e7ebf1",
+  bg: "#f5f7fa",
+  danger: "#e74c3c",
+  dangerBg: "#fdf1f0",
+  success: "#1ea672",
+  successBg: "#eafaf3",
+  gold: "#f5a623",
+  goldBg: "#fffaf0",
+};
+
 function ImageUploadModal({ facilityId, onClose, onSave }) {
   const [files, setFiles] = useState([]);
   const [previews, setPreviews] = useState([]);
@@ -104,14 +127,16 @@ function ImageUploadModal({ facilityId, onClose, onSave }) {
 
         {loading && (
           <div style={imgModalStyles.stepIndicator}>
-            <span style={{ ...imgModalStyles.stepDot, background: "#667eea" }}>
+            <span
+              style={{ ...imgModalStyles.stepDot, background: tokens.teal700 }}
+            >
               1
             </span>
             <span style={imgModalStyles.stepLine} />
             <span
               style={{
                 ...imgModalStyles.stepDot,
-                background: step === "saving" ? "#667eea" : "#dde1ea",
+                background: step === "saving" ? tokens.teal700 : "#dde1ea",
               }}
             >
               2
@@ -124,18 +149,7 @@ function ImageUploadModal({ facilityId, onClose, onSave }) {
           </div>
         )}
 
-        {error && (
-          <p
-            style={{
-              color: "#e74c3c",
-              fontSize: "13px",
-              marginTop: "10px",
-              textAlign: "center",
-            }}
-          >
-            ⚠️ {error}
-          </p>
-        )}
+        {error && <p style={modalStyles.errorText}>⚠️ {error}</p>}
 
         <div style={modalStyles.footer}>
           <button
@@ -150,7 +164,7 @@ function ImageUploadModal({ facilityId, onClose, onSave }) {
               ...modalStyles.saveBtn,
               background: loading
                 ? "#b2bec3"
-                : "linear-gradient(135deg,#3498db,#2980b9)",
+                : `linear-gradient(135deg, ${tokens.teal600}, ${tokens.teal900})`,
               cursor: loading ? "not-allowed" : "pointer",
             }}
             onClick={handleSave}
@@ -171,16 +185,16 @@ const imgModalStyles = {
     alignItems: "center",
     justifyContent: "center",
     gap: "8px",
-    border: "2px dashed #c5cde6",
+    border: `2px dashed ${tokens.teal100}`,
     borderRadius: "12px",
     padding: "28px 20px",
     cursor: "pointer",
-    backgroundColor: "#f8f9fc",
+    backgroundColor: tokens.teal50,
     transition: "border-color .2s",
     marginBottom: "16px",
   },
   dropIcon: { fontSize: "28px" },
-  dropText: { fontSize: "13px", color: "#7f8c8d", fontWeight: "500" },
+  dropText: { fontSize: "13px", color: tokens.ink400, fontWeight: "500" },
   previewGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(4, 1fr)",
@@ -221,7 +235,7 @@ const imgModalStyles = {
     gap: "8px",
     margin: "12px 0",
     padding: "10px 14px",
-    background: "#f0f4ff",
+    background: tokens.teal50,
     borderRadius: "8px",
   },
   stepDot: {
@@ -242,7 +256,7 @@ const imgModalStyles = {
     background: "#dde1ea",
     flexShrink: 0,
   },
-  stepText: { fontSize: "12px", color: "#5a6a85", fontWeight: "500" },
+  stepText: { fontSize: "12px", color: tokens.ink600, fontWeight: "500" },
 };
 
 function OptionsModal({ facilityId, info, onClose, onSave }) {
@@ -305,7 +319,7 @@ function OptionsModal({ facilityId, info, onClose, onSave }) {
               <div
                 style={{
                   ...modalStyles.switchTrack,
-                  background: value ? "#667eea" : "#dde1ea",
+                  background: value ? tokens.teal700 : "#dde1ea",
                 }}
                 onClick={() => setter(!value)}
               >
@@ -320,18 +334,7 @@ function OptionsModal({ facilityId, info, onClose, onSave }) {
           ))}
         </div>
 
-        {error && (
-          <p
-            style={{
-              color: "#e74c3c",
-              fontSize: "13px",
-              marginTop: "12px",
-              textAlign: "center",
-            }}
-          >
-            ⚠️ {error}
-          </p>
-        )}
+        {error && <p style={modalStyles.errorText}>⚠️ {error}</p>}
 
         <div style={modalStyles.footer}>
           <button
@@ -346,7 +349,7 @@ function OptionsModal({ facilityId, info, onClose, onSave }) {
               ...modalStyles.saveBtn,
               background: loading
                 ? "#b2bec3"
-                : "linear-gradient(135deg,#667eea,#764ba2)",
+                : `linear-gradient(135deg, ${tokens.teal600}, ${tokens.teal900})`,
               cursor: loading ? "not-allowed" : "pointer",
             }}
             onClick={handleSave}
@@ -369,9 +372,9 @@ const FOOD_TYPES = [
 ];
 
 const gradientByType = {
-  SPORT: "linear-gradient(135deg,#667eea,#764ba2)",
-  MOTEL: "linear-gradient(135deg,#f7971e,#ffd200)",
-  RESTAURANT: "linear-gradient(135deg,#11998e,#38ef7d)",
+  SPORT: "linear-gradient(135deg,#5b6dc9,#3d4d9e)",
+  MOTEL: "linear-gradient(135deg,#e8a13d,#c97f1e)",
+  RESTAURANT: `linear-gradient(135deg, ${tokens.teal600}, ${tokens.teal900})`,
 };
 
 const titleByType = {
@@ -549,9 +552,9 @@ function InfoModal({
                       transition: "all .15s",
                       background:
                         foodType === value
-                          ? "linear-gradient(135deg,#11998e,#38ef7d)"
+                          ? `linear-gradient(135deg, ${tokens.teal600}, ${tokens.teal900})`
                           : "#f0f2f7",
-                      color: foodType === value ? "#fff" : "#2c3e50",
+                      color: foodType === value ? "#fff" : tokens.ink900,
                       border:
                         foodType === value ? "none" : "1.5px solid #e2e6ee",
                       fontWeight: foodType === value ? "700" : "500",
@@ -583,18 +586,7 @@ function InfoModal({
           </>
         )}
 
-        {error && (
-          <p
-            style={{
-              color: "#e74c3c",
-              fontSize: "13px",
-              marginTop: "8px",
-              textAlign: "center",
-            }}
-          >
-            ⚠️ {error}
-          </p>
-        )}
+        {error && <p style={modalStyles.errorText}>⚠️ {error}</p>}
 
         <div style={modalStyles.footer}>
           <button
@@ -610,7 +602,7 @@ function InfoModal({
               background: loading
                 ? "#b2bec3"
                 : (gradientByType[facilityType] ??
-                  "linear-gradient(135deg,#667eea,#764ba2)"),
+                  `linear-gradient(135deg, ${tokens.teal600}, ${tokens.teal900})`),
               cursor: loading ? "not-allowed" : "pointer",
             }}
             onClick={handleSave}
@@ -676,6 +668,12 @@ function FacilityDetailsPage() {
 
   const handleSaveInfo = (updated) => {
     setLocalInfo((prev) => ({ ...prev, ...updated }));
+  };
+
+  const facilityTypeLabel = {
+    SPORT: "⚽ 스포츠 시설",
+    MOTEL: "🏨 모텔",
+    RESTAURANT: "🍽️ 음식점",
   };
 
   const renderTargetInfo = (target) => {
@@ -764,30 +762,39 @@ function FacilityDetailsPage() {
             style={styles.backButton}
             onClick={() => navigate("/facilities")}
           >
-            ⬅ 목록으로
+            ← 목록
           </button>
-          <h1 style={styles.pageTitle}>📋 시설 상세 정보</h1>
+          <div style={styles.headerDivider} />
+          <div>
+            <h1 style={styles.pageTitle}>시설 상세 정보</h1>
+            {facility && (
+              <span style={styles.pageSubtitle}>
+                {facilityTypeLabel[facility.facilityType] ??
+                  facility.facilityType}
+              </span>
+            )}
+          </div>
         </div>
 
         {facility && (
           <div style={styles.editGroup}>
             <button
-              style={styles.btnOptions}
+              style={styles.btnSecondary}
               onClick={() => setShowOptionsModal(true)}
             >
               ⚙️ 옵션 수정
             </button>
             <button
-              style={styles.btnInfo}
-              onClick={() => setShowInfoModal(true)}
-            >
-              📝 정보 수정
-            </button>
-            <button
-              style={styles.btnImage}
+              style={styles.btnSecondary}
               onClick={() => setShowImageModal(true)}
             >
               📷 사진 추가
+            </button>
+            <button
+              style={styles.btnPrimary}
+              onClick={() => setShowInfoModal(true)}
+            >
+              📝 정보 수정
             </button>
           </div>
         )}
@@ -796,7 +803,7 @@ function FacilityDetailsPage() {
       <main style={styles.mainContent}>
         {loading && <p style={styles.statusText}>⏳ 불러오는 중...</p>}
         {error && (
-          <p style={{ ...styles.statusText, color: "#e74c3c" }}>{error}</p>
+          <p style={{ ...styles.statusText, color: tokens.danger }}>{error}</p>
         )}
 
         {!loading && !error && facility && (
@@ -806,11 +813,16 @@ function FacilityDetailsPage() {
               <div style={styles.card}>
                 {facility.imageUrls?.length > 0 ? (
                   <>
-                    <img
-                      src={facility.imageUrls[selectedImg]}
-                      alt="main"
-                      style={styles.mainImage}
-                    />
+                    <div style={styles.mainImageWrap}>
+                      <img
+                        src={facility.imageUrls[selectedImg]}
+                        alt="main"
+                        style={styles.mainImage}
+                      />
+                      <div style={styles.imageCountBadge}>
+                        {selectedImg + 1} / {facility.imageUrls.length}
+                      </div>
+                    </div>
                     {facility.imageUrls.length > 1 && (
                       <div style={styles.thumbRow}>
                         {facility.imageUrls.map((url, idx) => (
@@ -822,8 +834,9 @@ function FacilityDetailsPage() {
                               ...styles.thumb,
                               border:
                                 selectedImg === idx
-                                  ? "2px solid #3498db"
+                                  ? `2px solid ${tokens.teal700}`
                                   : "2px solid transparent",
+                              opacity: selectedImg === idx ? 1 : 0.7,
                             }}
                             onClick={() => setSelectedImg(idx)}
                           />
@@ -842,69 +855,83 @@ function FacilityDetailsPage() {
               {/* 기본 정보 */}
               <div style={styles.card}>
                 <div style={styles.cardTitleRow}>
-                  <h2 style={styles.cardTitle}>🏢 기본 정보</h2>
-                  <div style={styles.tagRow}>
-                    <span
-                      style={{
-                        ...styles.tag,
-                        color: info.active ? "#2ecc71" : "#e74c3c",
-                      }}
-                    >
-                      ● {info.active ? "영업 가능" : "영업 불가"}
+                  <h2 style={styles.cardTitle}>기본 정보</h2>
+                  <button
+                    type="button"
+                    style={styles.ratingBox}
+                    onClick={() => navigate(`/facilities/${id}/reviews`)}
+                    title="이용 후기 보러 가기"
+                  >
+                    <span style={styles.ratingStar}>★</span>
+                    <span style={styles.ratingValue}>
+                      {info.averageRating != null
+                        ? Number(info.averageRating).toFixed(1)
+                        : "—"}
                     </span>
-                    <span
-                      style={{
-                        ...styles.tag,
-                        color: info.carPark ? "#2ecc71" : "#e74c3c",
-                      }}
-                    >
-                      🚗 {info.carPark ? "주차 가능" : "주차 불가"}
+                    <span style={styles.ratingCount}>
+                      ({info.totalReviews ?? 0}개 평가)
                     </span>
-                    <span
-                      style={{
-                        ...styles.tag,
-                        color: info.hasWifi ? "#2ecc71" : "#e74c3c",
-                      }}
-                    >
-                      📶 {info.hasWifi ? "WiFi 가능" : "WiFi 불가"}
-                    </span>
-                  </div>
+                    <span style={styles.ratingArrow}>›</span>
+                  </button>
                 </div>
 
-                <div style={styles.infoGrid}>
-                  <InfoItem label="시설명" value={info.name} />
-                  <InfoItem label="유형" value={facility.facilityType} />
-                  <InfoItem label="주소" value={info.address} span />
-                  <InfoItem
-                    label="등록일"
-                    value={
-                      info.createdAt
-                        ? new Date(info.createdAt).toLocaleDateString("ko-KR")
-                        : "-"
-                    }
+                <div style={styles.tagRow}>
+                  <Badge
+                    on={!!info.active}
+                    onLabel="영업 가능"
+                    offLabel="영업 불가"
                   />
-                  <InfoItem
-                    label="수정일"
-                    value={
-                      info.updatedAt
-                        ? new Date(info.updatedAt).toLocaleDateString("ko-KR")
-                        : "-"
-                    }
+                  <Badge
+                    on={!!info.carPark}
+                    onLabel="🚗 주차 가능"
+                    offLabel="🚗 주차 불가"
+                  />
+                  <Badge
+                    on={!!info.hasWifi}
+                    onLabel="📶 WiFi 가능"
+                    offLabel="📶 WiFi 불가"
                   />
                 </div>
 
-                {/* ── RATING ── */}
-                <div style={styles.ratingBox}>
-                  <span style={styles.ratingStar}>★</span>
-                  <span style={styles.ratingValue}>
-                    {info.averageRating != null
-                      ? Number(info.averageRating).toFixed(1)
-                      : "—"}
-                  </span>
-                  <span style={styles.ratingCount}>
-                    ({info.totalReviews ?? 0}개 평가)
-                  </span>
-                </div>
+                <div style={styles.divider} />
+
+                <table style={styles.infoTable}>
+                  <tbody>
+                    <tr style={styles.infoTableRow}>
+                      <th style={styles.infoTableLabel}>시설명</th>
+                      <td style={styles.infoTableValue}>{info.name || "-"}</td>
+                    </tr>
+                    <tr style={styles.infoTableRow}>
+                      <th style={styles.infoTableLabel}>유형</th>
+                      <td style={styles.infoTableValue}>
+                        {facilityTypeLabel[facility.facilityType] ??
+                          facility.facilityType}
+                      </td>
+                    </tr>
+                    <tr style={styles.infoTableRow}>
+                      <th style={styles.infoTableLabel}>주소</th>
+                      <td style={styles.infoTableValue}>
+                        {info.address || "-"}
+                      </td>
+                    </tr>
+                    <tr style={styles.infoTableRow}>
+                      <th style={styles.infoTableLabel}>등록일</th>
+                      <td style={styles.infoTableValue}>
+                        {info.createdAt
+                          ? new Date(info.createdAt).toLocaleDateString("ko-KR")
+                          : "-"}
+                      </td>
+                    </tr>
+                    <tr style={styles.infoTableRowLast}>
+                      <th style={styles.infoTableLabel}>수정일</th>
+                      <td style={styles.infoTableValue}>
+                        {info.updatedAt
+                          ? new Date(info.updatedAt).toLocaleDateString("ko-KR")
+                          : "-"}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
 
                 {info.description && (
                   <div style={styles.descBox}>
@@ -914,7 +941,10 @@ function FacilityDetailsPage() {
                 )}
                 {info.instruction && (
                   <div
-                    style={{ ...styles.descBox, backgroundColor: "#f0f8ff" }}
+                    style={{
+                      ...styles.descBox,
+                      backgroundColor: tokens.teal50,
+                    }}
                   >
                     <span style={styles.noteLabel}>🗺️ 찾아오는 방법</span>
                     <p style={styles.descText}>{info.instruction}</p>
@@ -926,23 +956,6 @@ function FacilityDetailsPage() {
               <div style={styles.card}>
                 <h2 style={styles.cardTitle}>💰 서비스 정보</h2>
                 {renderTargetInfo(facility.facilityTarget)}
-              </div>
-
-              {/* 이용 후기 */}
-              <div style={styles.card}>
-                <h2 style={styles.cardTitle}>⭐ 이용 후기</h2>
-                <div style={styles.reviewPlaceholder}>
-                  <p style={styles.emptyText}>아직 등록된 후기가 없습니다.</p>
-                  <p
-                    style={{
-                      fontSize: "13px",
-                      color: "#bbb",
-                      marginTop: "6px",
-                    }}
-                  >
-                    리뷰 기능은 추후 업데이트될 예정입니다.
-                  </p>
-                </div>
               </div>
             </div>
           </div>
@@ -979,6 +992,26 @@ function FacilityDetailsPage() {
   );
 }
 
+function Badge({ on, onLabel, offLabel }) {
+  return (
+    <span
+      style={{
+        ...styles.badge,
+        color: on ? tokens.success : tokens.danger,
+        backgroundColor: on ? tokens.successBg : tokens.dangerBg,
+      }}
+    >
+      <span
+        style={{
+          ...styles.badgeDot,
+          backgroundColor: on ? tokens.success : tokens.danger,
+        }}
+      />
+      {on ? onLabel : offLabel}
+    </span>
+  );
+}
+
 function InfoItem({ label, value, span }) {
   return (
     <div style={{ gridColumn: span ? "1 / -1" : undefined }}>
@@ -992,118 +1025,169 @@ const itemStyles = {
   label: {
     display: "block",
     fontSize: "11px",
-    color: "#95a5a6",
+    color: tokens.ink400,
     marginBottom: "3px",
     fontWeight: "600",
     textTransform: "uppercase",
+    letterSpacing: ".4px",
   },
-  value: { fontSize: "14px", color: "#2c3e50", fontWeight: "500" },
+  value: { fontSize: "14px", color: tokens.ink900, fontWeight: "500" },
 };
 
 const styles = {
   layout: {
     minHeight: "100vh",
-    backgroundColor: "#f5f6fa",
+    backgroundColor: tokens.bg,
     fontFamily: "Arial, sans-serif",
   },
   header: {
     backgroundColor: "#fff",
-    padding: "15px 30px",
-    boxShadow: "0 2px 5px rgba(0,0,0,0.05)",
-    borderBottom: "1px solid #eaeaea",
+    padding: "18px 32px",
+    boxShadow: "0 1px 3px rgba(15,23,42,0.04)",
+    borderBottom: `1px solid ${tokens.border}`,
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
+    position: "sticky",
+    top: 0,
+    zIndex: 100,
   },
-  headerLeft: { display: "flex", alignItems: "center", gap: "20px" },
+  headerLeft: { display: "flex", alignItems: "center", gap: "16px" },
   backButton: {
-    padding: "8px 14px",
-    borderRadius: "6px",
-    border: "1px solid #ddd",
+    padding: "9px 16px",
+    borderRadius: "8px",
+    border: `1px solid ${tokens.border}`,
     backgroundColor: "#fff",
     cursor: "pointer",
-    fontSize: "14px",
+    fontSize: "13.5px",
+    fontWeight: "600",
+    color: tokens.ink600,
   },
-  pageTitle: { fontSize: "22px", color: "#2c3e50", margin: 0 },
-  editGroup: { display: "flex", gap: "10px" },
-  btnOptions: {
-    padding: "9px 18px",
+  headerDivider: {
+    width: "1px",
+    height: "28px",
+    backgroundColor: tokens.border,
+  },
+  pageTitle: {
+    fontSize: "19px",
+    fontWeight: "700",
+    color: tokens.ink900,
+    margin: 0,
+  },
+  pageSubtitle: {
+    fontSize: "12.5px",
+    color: tokens.ink400,
+    fontWeight: "600",
+  },
+  editGroup: { display: "flex", gap: "8px" },
+  btnPrimary: {
+    padding: "10px 18px",
     borderRadius: "8px",
     border: "none",
-    background: "linear-gradient(135deg,#667eea,#764ba2)",
+    background: `linear-gradient(135deg, ${tokens.teal600}, ${tokens.teal900})`,
     color: "#fff",
     fontSize: "13px",
     fontWeight: "700",
     cursor: "pointer",
-    boxShadow: "0 3px 10px rgba(102,126,234,0.35)",
+    boxShadow: "0 4px 12px rgba(32,138,138,0.28)",
   },
-  btnInfo: {
-    padding: "9px 18px",
+  btnSecondary: {
+    padding: "10px 18px",
     borderRadius: "8px",
-    border: "none",
-    background: "linear-gradient(135deg,#11998e,#38ef7d)",
-    color: "#fff",
+    border: `1.5px solid ${tokens.border}`,
+    background: "#fff",
+    color: tokens.ink600,
     fontSize: "13px",
-    fontWeight: "700",
+    fontWeight: "600",
     cursor: "pointer",
-    boxShadow: "0 3px 10px rgba(17,153,142,0.35)",
   },
-  btnImage: {
-    padding: "9px 18px",
-    borderRadius: "8px",
-    border: "none",
-    background: "linear-gradient(135deg,#3498db,#2980b9)",
-    color: "#fff",
-    fontSize: "13px",
-    fontWeight: "700",
-    cursor: "pointer",
-    boxShadow: "0 3px 10px rgba(52,152,219,0.35)",
-  },
-  mainContent: { padding: "30px", maxWidth: "1200px", margin: "0 auto" },
+  mainContent: { padding: "28px 32px", maxWidth: "1200px", margin: "0 auto" },
   statusText: {
     textAlign: "center",
-    color: "#7f8c8d",
+    color: tokens.ink400,
     marginTop: "80px",
     fontSize: "16px",
   },
-  contentWrapper: { display: "flex", gap: "24px", alignItems: "flex-start" },
-  leftCol: { width: "300px", flexShrink: 0 },
-  rightCol: { display: "flex", flexDirection: "column", gap: "20px", flex: 1 },
+  contentWrapper: { display: "flex", gap: "22px", alignItems: "flex-start" },
+  leftCol: { width: "320px", flexShrink: 0, position: "sticky", top: "90px" },
+  rightCol: { display: "flex", flexDirection: "column", gap: "18px", flex: 1 },
   card: {
     backgroundColor: "#fff",
-    borderRadius: "12px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+    borderRadius: "14px",
+    border: `1px solid ${tokens.border}`,
+    boxShadow: "0 1px 3px rgba(15,23,42,0.04)",
     padding: "24px",
   },
   cardTitle: {
     fontSize: "15px",
     fontWeight: "700",
-    color: "#2c3e50",
-    marginBottom: "16px",
-    marginTop: 0,
+    color: tokens.ink900,
+    margin: 0,
   },
   cardTitleRow: {
     display: "flex",
     justifyContent: "space-between",
-    alignItems: "flex-start",
+    alignItems: "center",
+    marginBottom: "14px",
+    flexWrap: "wrap",
+    gap: "8px",
+  },
+  tagRow: {
+    display: "flex",
+    gap: "8px",
+    flexWrap: "wrap",
     marginBottom: "16px",
   },
-  tagRow: { display: "flex", gap: "8px", flexWrap: "wrap" },
-  tag: { fontSize: "12px", fontWeight: "600" },
+  badge: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "6px",
+    fontSize: "12px",
+    fontWeight: "700",
+    padding: "5px 12px",
+    borderRadius: "999px",
+  },
+  badgeDot: {
+    width: "6px",
+    height: "6px",
+    borderRadius: "50%",
+    flexShrink: 0,
+  },
+  divider: {
+    height: "1px",
+    backgroundColor: tokens.border,
+    margin: "0 0 16px",
+  },
+  mainImageWrap: {
+    position: "relative",
+    marginBottom: "10px",
+  },
   mainImage: {
     width: "100%",
     height: "200px",
     objectFit: "cover",
-    borderRadius: "8px",
-    marginBottom: "10px",
+    borderRadius: "10px",
+    display: "block",
+  },
+  imageCountBadge: {
+    position: "absolute",
+    bottom: "10px",
+    right: "10px",
+    backgroundColor: "rgba(15,23,42,0.65)",
+    color: "#fff",
+    fontSize: "11px",
+    fontWeight: "700",
+    padding: "3px 9px",
+    borderRadius: "999px",
   },
   thumbRow: { display: "flex", gap: "8px", flexWrap: "wrap" },
   thumb: {
     width: "56px",
     height: "56px",
     objectFit: "cover",
-    borderRadius: "6px",
+    borderRadius: "7px",
     cursor: "pointer",
+    transition: "opacity .15s",
   },
   noImage: {
     height: "160px",
@@ -1112,9 +1196,10 @@ const styles = {
     justifyContent: "center",
     color: "#ccc",
     fontSize: "16px",
-    backgroundColor: "#fafbfc",
-    borderRadius: "8px",
+    backgroundColor: tokens.bg,
+    borderRadius: "10px",
   },
+  /* dùng cho phần 서비스 정보 (Sport/Motel/Restaurant) */
   infoGrid: {
     display: "grid",
     gridTemplateColumns: "1fr 1fr",
@@ -1122,74 +1207,112 @@ const styles = {
     marginBottom: "16px",
   },
 
-  /* ── RATING ── */
+  /* ── INFO TABLE ── */
+  infoTable: {
+    width: "100%",
+    borderCollapse: "collapse",
+    marginBottom: "4px",
+  },
+  infoTableRow: {
+    borderBottom: `1px solid ${tokens.border}`,
+  },
+  infoTableRowLast: {
+    borderBottom: "none",
+  },
+  infoTableLabel: {
+    textAlign: "left",
+    verticalAlign: "top",
+    padding: "11px 16px 11px 0",
+    width: "110px",
+    fontSize: "12px",
+    fontWeight: "700",
+    color: tokens.ink400,
+    textTransform: "uppercase",
+    letterSpacing: ".4px",
+    whiteSpace: "nowrap",
+  },
+  infoTableValue: {
+    textAlign: "left",
+    padding: "11px 0",
+    fontSize: "14px",
+    color: tokens.ink900,
+    fontWeight: "500",
+  },
+
+  /* ── RATING (clickable) ── */
   ratingBox: {
     display: "inline-flex",
     alignItems: "center",
     gap: "6px",
-    backgroundColor: "#fffbf0",
+    backgroundColor: tokens.goldBg,
     border: "1px solid #fde8a0",
-    borderRadius: "8px",
-    padding: "7px 14px",
-    marginBottom: "14px",
+    borderRadius: "999px",
+    padding: "5px 10px 5px 12px",
+    cursor: "pointer",
+    fontFamily: "inherit",
   },
   ratingStar: {
-    fontSize: "16px",
-    color: "#f5a623",
+    fontSize: "14px",
+    color: tokens.gold,
   },
   ratingValue: {
-    fontSize: "15px",
+    fontSize: "13px",
     fontWeight: "700",
-    color: "#2c3e50",
+    color: tokens.ink900,
   },
   ratingCount: {
-    fontSize: "12px",
-    color: "#aaa",
+    fontSize: "11.5px",
+    color: tokens.ink400,
+  },
+  ratingArrow: {
+    fontSize: "15px",
+    color: tokens.ink400,
+    fontWeight: "700",
+    marginLeft: "2px",
   },
 
   descBox: {
-    backgroundColor: "#fafbfc",
-    borderRadius: "8px",
+    backgroundColor: tokens.bg,
+    borderRadius: "10px",
     padding: "12px 14px",
     marginTop: "8px",
   },
   descText: {
     margin: 0,
     fontSize: "14px",
-    color: "#555",
+    color: tokens.ink600,
     lineHeight: "1.6",
     marginTop: "6px",
   },
   noteLabel: {
     fontSize: "11px",
     fontWeight: "700",
-    color: "#95a5a6",
+    color: tokens.ink400,
     textTransform: "uppercase",
     display: "block",
+    letterSpacing: ".4px",
   },
-  emptyText: { color: "#aaa", fontSize: "14px", textAlign: "center" },
-  reviewPlaceholder: {
-    minHeight: "100px",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
+  emptyText: {
+    color: tokens.ink400,
+    fontSize: "14px",
+    textAlign: "center",
+    margin: 0,
   },
   btnMenu: {
-    padding: "8px 16px",
+    padding: "9px 16px",
     borderRadius: "8px",
-    border: "1px solid #ddd",
-    backgroundColor: "#fff",
+    border: `1.5px solid ${tokens.teal100}`,
+    backgroundColor: tokens.teal50,
     fontSize: "13px",
-    fontWeight: "600",
+    fontWeight: "700",
     cursor: "pointer",
-    color: "#2c3e50",
-    marginTop: "8px",
+    color: tokens.teal900,
+    marginTop: "10px",
   },
   btnRow: {
     display: "flex",
     gap: "10px",
-    marginTop: "8px",
+    marginTop: "10px",
   },
 };
 
@@ -1229,7 +1352,7 @@ const modalStyles = {
   title: {
     fontSize: "16px",
     fontWeight: "700",
-    color: "#1e2b3a",
+    color: tokens.ink900,
     marginBottom: "22px",
     marginTop: 0,
   },
@@ -1243,7 +1366,7 @@ const modalStyles = {
     borderRadius: "10px",
     border: "1.5px solid #eef0f6",
   },
-  toggleLabel: { fontSize: "14px", fontWeight: "500", color: "#2c3e50" },
+  toggleLabel: { fontSize: "14px", fontWeight: "500", color: tokens.ink900 },
   switchTrack: {
     width: "46px",
     height: "26px",
@@ -1283,7 +1406,7 @@ const modalStyles = {
     borderRadius: "9px",
     fontSize: "13.5px",
     fontFamily: "inherit",
-    color: "#2c3e50",
+    color: tokens.ink900,
     background: "#fafbfc",
     outline: "none",
     width: "100%",
@@ -1294,13 +1417,19 @@ const modalStyles = {
     borderRadius: "9px",
     fontSize: "13.5px",
     fontFamily: "inherit",
-    color: "#2c3e50",
+    color: tokens.ink900,
     background: "#fafbfc",
     outline: "none",
     width: "100%",
     resize: "vertical",
     minHeight: "80px",
     lineHeight: "1.55",
+  },
+  errorText: {
+    color: tokens.danger,
+    fontSize: "13px",
+    marginTop: "10px",
+    textAlign: "center",
   },
   footer: {
     display: "flex",

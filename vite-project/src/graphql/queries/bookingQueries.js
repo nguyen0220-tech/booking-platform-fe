@@ -83,6 +83,9 @@ export const GET_BOOKING_DETAIL = `
         }
         imageUrls
       }
+      reviewEligibility{
+        reviewStatus
+      }
     }
   }
 `;

@@ -53,6 +53,26 @@ function ProfilePage() {
     }
   };
 
+  // Điều hướng về trang chủ theo role, giống logic ở LoginPage
+  const handleGoHome = () => {
+    let userData = null;
+    try {
+      userData = JSON.parse(localStorage.getItem("user"));
+    } catch (e) {
+      userData = null;
+    }
+
+    const roles = userData?.roles?.map((r) => r.name) ?? [];
+
+    if (roles.includes("ROLE_ADMIN")) {
+      navigate("/admin");
+    } else if (roles.includes("ROLE_PROVIDER")) {
+      navigate("/provider");
+    } else {
+      navigate("/home"); // ROLE_USER hoặc mặc định
+    }
+  };
+
   const handleAvatarClick = () => {
     if (!uploading) {
       fileInputRef.current.click();
@@ -199,7 +219,7 @@ function ProfilePage() {
 
   return (
     <div style={styles.layout}>
-      <button style={styles.backBtn} onClick={() => navigate("/home")}>
+      <button style={styles.backBtn} onClick={handleGoHome}>
         ⬅ Home
       </button>
 

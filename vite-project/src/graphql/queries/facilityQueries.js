@@ -318,6 +318,25 @@ export const GET_FACILITY_PUBLIC_DETAIL = `
           hasNext
         }
       }
+      reviews(page: 0, size: 5) {
+        data {
+          id
+          rating
+          content
+          createdAt
+          reviewer {
+            id
+            infoDetails {
+              fullName
+              avatarUrl
+            }
+          }
+        }
+      }
+      ratingGroupBy {
+        rating
+        count
+      }
     }
   }
 `;
@@ -365,6 +384,8 @@ export const GET_FACILITIES_SUGGESTION = `
         facilityInfo {
           name
           address
+          averageRating
+          totalReviews
         }
         imageUrls
       }

@@ -21,6 +21,7 @@ import PackagePublicViewPage from "./pages/PackagePublicViewPage";
 import BookingPage from "./pages/BookingPage";
 import BookingDetailsPage from "./pages/BookingDetailsPage";
 import PopularDestinationFacilities from "./pages/PopularDestinationFacilities";
+import FacilityReviewsPage from "./pages/FacilityReviewsPage";
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
       <Route path="/profile/verify" element={<ProfileVerifyPage />} />
       <Route path="/facilities" element={<FacilityPage />} />
       <Route path="/facilities/:id/menus" element={<RestaurantMenuPage />} />
+      <Route path="/facilities/:id/reviews" element={<FacilityReviewsPage />} />
       <Route path="/facility-registry" element={<FacilityRegistryPage />} />
       <Route path="/facility-details/:id" element={<FacilityDetailsPage />} />
       <Route
